@@ -1,14 +1,14 @@
 CC=gcc
 .PHONY: run clean
 
-run: main bad
+run: bin/main bin/bad
 	./$^
 
-%:%.c
+bin/%: src/%.c
 	gcc -Wall -o $@ $^
 
-main: main.c
-bad: bad.c
+bin/main: src/main.c
+bin/bad: src/bad.c
 
 clean:
-	rm *.o main bad
+	rm -f bin/*.o bin/main bin/bad
