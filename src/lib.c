@@ -9,22 +9,35 @@
 
 #include "../header/lib.h"
 
+
+
+void exec_prog(const char *filename)
+{
+    if (execl(filename, filename, 0, NULL) == -1)
+        perror("\tERROR: exec_prog: ptrace");
+}
+
+
 int run_prog(const char *filename)
 {
 	if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1)
-	{
-        perror("ERROR: run_prog: ptrace");
-        return -1;
-    }
+        return perror("\tERROR: run_prog: ptrace"), -1;
 
-    if (execl(filename, filename, 0, NULL) == -1)
-	{
-        perror("ERROR: run_prog: ptrace");
-        return -1;
-    }
+    exec_prog(filename);
+    
 	return 0;
 }
 
+void print_pwd(char *filename)
+{
+    char* path = realpath(filename, NULL);
+    if(!path)
+        printf("\tcannot find %s\n", filename);
+    else{
+        printf("\t%s\n", path);
+        free(path);
+    }
+}
 
 char *print_si_code(int si_signo, int si_code)
 {
@@ -195,7 +208,7 @@ void getsignal(pid_t child)
     siginfo_t sig;
 
     if(ptrace(PTRACE_GETSIGINFO, child, NULL, &sig) == -1)
-    	perror("\tERROR : getsignal");
+    	perror("\tERROR : getsignal : PTRACE_GETSIGINFO");
 
     char *s = print_si_code(sig.si_signo, sig.si_code);
     printf("\t%s %s\n", strsignal(sig.si_signo), s);
@@ -205,28 +218,31 @@ void getsignal(pid_t child)
 
 void helpMsg()
 {
-	printf("%s\n%s\n%s\n%s\n%s\n%s\n",
+	printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 		"\thelp\t to show this message",
 		"\texit\t to quit this interface",
         "\trun\t to run the program",
 		"\tsignal\t to list the last signal received",
         "\tPID\t to print the PID of the program to analyse",
-        "\tPPID\t to print the PID of this process");
+        "\tPPID\t to print the PID of this process",
+        "\tpwd\t to print the localisation of the program to analyse");
 }
 
 void resume(pid_t child)
 {
     if(ptrace(PTRACE_CONT, child, 0, 0) == -1)
-        perror("\tERROR : PTRACE_CONT");
+        perror("\tERROR : resume : PTRACE_CONT");
     //need a wait of the execution ! 
     //printf("\nanalyse >>> ");
+    sleep(1);
+
 }
 
-int start_UI(pid_t child)
+int start_UI(pid_t child, char *filename)
 {
 	int run = 1;
 	char input[20];
-	const char *options[6] = {"help", "exit", "run", "signal", "PID", "PPID"};
+	const char *options[7] = {"help", "exit", "run", "signal", "PID", "PPID", "pwd"};
 
 	while(run)
     {
@@ -245,6 +261,8 @@ int start_UI(pid_t child)
             printf("\t %d\n", child);
         else if(strcmp(input, options[5]) == 0)
             printf("\t %d\n", getpid());
+        else if(strcmp(input, options[6]) == 0)
+            print_pwd(filename);
         else
         	printf("\t\"%s\" : unknown command\n", input);
 	}
