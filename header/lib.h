@@ -18,6 +18,9 @@ void getsignal(pid_t child);
 // Print a list of all the options
 void helpMsg();
 
+//
+void kill_child_process(pid_t child);
+
 // Resume the execution of the programm to analyse
 void resume(pid_t child);
 
