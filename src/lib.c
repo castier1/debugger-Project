@@ -20,12 +20,12 @@ void exec_prog(const char *filename)
 
 int run_prog(const char *filename)
 {
-	if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1)
+    if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1)
         return perror("\tERROR: run_prog: ptrace"), -1;
 
     exec_prog(filename);
     
-	return 0;
+    return 0;
 }
 
 void print_pwd(char *filename)
@@ -204,11 +204,11 @@ char *print_si_code(int si_signo, int si_code)
 }
 
 void getsignal(pid_t child)
-{	
+{
     siginfo_t sig;
 
     if(ptrace(PTRACE_GETSIGINFO, child, NULL, &sig) == -1)
-    	perror("\tERROR : getsignal : PTRACE_GETSIGINFO");
+        perror("\tERROR : getsignal : PTRACE_GETSIGINFO");
 
     char *s = print_si_code(sig.si_signo, sig.si_code);
     printf("\t%s %s\n", strsignal(sig.si_signo), s);
@@ -218,42 +218,50 @@ void getsignal(pid_t child)
 
 void helpMsg()
 {
-	printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-		"\thelp\t to show this message",
-		"\texit\t to quit this interface",
+    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+        "\thelp\t to show this message",
+        "\texit\t to quit this interface",
         "\trun\t to run the program",
-		"\tsignal\t to list the last signal received",
+        "\tsignal\t to list the last signal received",
         "\tPID\t to print the PID",
         "\tPPID\t to print the PPID",
         "\tGID\t to print the GID",
         "\tpwd\t to print the absolute path of the program to analyse");
 }
 
+void kill_child_process(pid_t child)
+{
+    if(ptrace(PTRACE_KILL, child, 0, 0) == -1)
+        perror("\tERROR : resume : PTRACE_CONT");
+    sleep(1);
+
+}
+
 void resume(pid_t child)
 {
     if(ptrace(PTRACE_CONT, child, 0, 0) == -1)
         perror("\tERROR : resume : PTRACE_CONT");
-    //need a wait of the execution ! 
-    //printf("\nanalyse >>> ");
     sleep(1);
 
 }
 
 int start_UI(pid_t child, gid_t gid, char *filename)
 {
-	int run = 1;
-	char input[20];
-	const char *options[8] = {"help", "exit", "run", "signal", "PID", "PPID", "GID", "pwd"};
+    int run = 1;
+    char input[20];
+    const char *options[8] = {"help", "exit", "run", "signal", "PID", "PPID", "GID", "pwd"};
 
-	while(run)
+    while(run)
     {
-		printf("analyse >>> ");
+        printf("analyse >>> ");
         scanf("%s", input);
 
         if(strcmp(input, options[0]) == 0)
             helpMsg();
-        else if(strcmp(input, options[1]) == 0)
+        else if(strcmp(input, options[1]) == 0){
             run = 0;
+            kill_child_process(child);
+        }
         else if(strcmp(input, options[2]) == 0)
             resume(child);
         else if (strcmp(input, options[3]) == 0)
@@ -267,7 +275,7 @@ int start_UI(pid_t child, gid_t gid, char *filename)
         else if(strcmp(input, options[7]) == 0)
             print_pwd(filename);
         else
-        	printf("\t\"%s\" : unknown command\n", input);
-	}
-	return 0;
+            printf("\t\"%s\" : unknown command\n", input);
+    }
+    return 0;
 }
