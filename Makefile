@@ -7,7 +7,7 @@ CC=gcc
 
 run: bin/main bin/bad bin/good
 	./$< bin/good
-	#./$< bin/bad
+	./$< bin/bad
 
 
 # --- COMPILATIONS --- #

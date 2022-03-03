@@ -1,10 +1,7 @@
 #include <unistd.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/wait.h>
-#include <signal.h>
-#include <execinfo.h>
-#include <stdlib.h>
-
 
 #include "../header/lib.h"
 
@@ -29,8 +26,7 @@ int main(int argc, char **argv )
 	} else {
 		//If in Parent process
 		waitpid(child, &status, 0);
-
-		if(start_UI() == -1)
+		if(start_UI(child) == -1)
 			printf("ERROR: main: start_UI\n");
 
 		printf("PARENT: child done\n");
