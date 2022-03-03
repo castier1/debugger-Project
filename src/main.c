@@ -9,7 +9,8 @@
 int main(int argc, char **argv )
 {
 	int status;
-	pid_t child;
+	pid_t child = 0;
+	gid_t gid = 0;
 
 	if(argc != 2)
 		return printf("USAGE: ./main <prog_to_analyse>\n"), 1;
@@ -24,6 +25,8 @@ int main(int argc, char **argv )
 		if(run_prog(argv[1]) == -1)
 			printf("ERROR: main: run_prog\n");
 
+		gid = getgid();
+
 		printf("CHILD: child done\n");
 		exit(0);
 	}
@@ -31,7 +34,7 @@ int main(int argc, char **argv )
 	{
 		//If in Parent process
 		waitpid(child, &status, 0);
-		if(start_UI(child, argv[1]) == -1)
+		if(start_UI(child, gid, argv[1]) == -1)
 			printf("ERROR: main: start_UI\n");
 
 		printf("PARENT: child done\n");

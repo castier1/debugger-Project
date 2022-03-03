@@ -218,14 +218,15 @@ void getsignal(pid_t child)
 
 void helpMsg()
 {
-	printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+	printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 		"\thelp\t to show this message",
 		"\texit\t to quit this interface",
         "\trun\t to run the program",
 		"\tsignal\t to list the last signal received",
-        "\tPID\t to print the PID of the program to analyse",
-        "\tPPID\t to print the PID of this process",
-        "\tpwd\t to print the localisation of the program to analyse");
+        "\tPID\t to print the PID",
+        "\tPPID\t to print the PPID",
+        "\tGID\t to print the GID",
+        "\tpwd\t to print the absolute path of the program to analyse");
 }
 
 void resume(pid_t child)
@@ -238,11 +239,11 @@ void resume(pid_t child)
 
 }
 
-int start_UI(pid_t child, char *filename)
+int start_UI(pid_t child, gid_t gid, char *filename)
 {
 	int run = 1;
 	char input[20];
-	const char *options[7] = {"help", "exit", "run", "signal", "PID", "PPID", "pwd"};
+	const char *options[8] = {"help", "exit", "run", "signal", "PID", "PPID", "GID", "pwd"};
 
 	while(run)
     {
@@ -262,6 +263,8 @@ int start_UI(pid_t child, char *filename)
         else if(strcmp(input, options[5]) == 0)
             printf("\t %d\n", getpid());
         else if(strcmp(input, options[6]) == 0)
+            printf("\t %d\n", gid);
+        else if(strcmp(input, options[7]) == 0)
             print_pwd(filename);
         else
         	printf("\t\"%s\" : unknown command\n", input);

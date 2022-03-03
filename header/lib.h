@@ -7,7 +7,7 @@ void exec_prog(const char *filename);
 int run_prog(const char *filename);
 
 //
-void print_pwd(char *path);
+void print_pwd(char *filename);
 
 //
 char *print_si_code(int si_signo, int si_code);
@@ -22,4 +22,4 @@ void helpMsg();
 void resume(pid_t child);
 
 // Start the analyse (with user's interface)
-int start_UI(pid_t child, char *path);
+int start_UI(pid_t child, gid_t gid, char *filename);
