@@ -10,7 +10,6 @@
 #include "../header/lib.h"
 
 
-
 void exec_prog(const char *filename)
 {
     if (execl(filename, filename, 0, NULL) == -1)
@@ -27,6 +26,13 @@ int run_prog(const char *filename)
     
     return 0;
 }
+
+void where_am_i(const char *file, const char *function, const int line)
+{
+    // To call with : __FILE__, __FUNCTION__, __LINE__
+    fprintf(stdout, "\tfile: %s, function : %s, line : %d\n", file, function, line);
+}
+
 
 void print_pwd(char *filename)
 {
@@ -212,6 +218,7 @@ void getsignal(pid_t child)
 
     char *s = print_si_code(sig.si_signo, sig.si_code);
     printf("\t%s %s\n", strsignal(sig.si_signo), s);
+    printf("\tadrr = %p\n", &sig.si_addr);
 
     free(s);
 }
@@ -233,6 +240,8 @@ void kill_child_process(pid_t child)
 {
     if(ptrace(PTRACE_KILL, child, 0, 0) == -1)
         perror("\tERROR : resume : PTRACE_CONT");
+    else
+        printf("\tProcess %d killed\n", child);
     sleep(1);
 
 }
@@ -264,7 +273,7 @@ int start_UI(pid_t child, gid_t gid, char *filename)
         }
         else if(strcmp(input, options[2]) == 0)
             resume(child);
-        else if (strcmp(input, options[3]) == 0)
+        else if(strcmp(input, options[3]) == 0)
             getsignal(child);
         else if(strcmp(input, options[4]) == 0)
             printf("\t %d\n", child);

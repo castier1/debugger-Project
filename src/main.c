@@ -15,7 +15,6 @@ int main(int argc, char **argv )
 	if(argc != 2)
 		return printf("USAGE: ./main <prog_to_analyse>\n"), 1;
 
-
     child = fork();
     if (child < 0)
         return printf("ERROR : main : fork failed"), 1;

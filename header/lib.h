@@ -7,6 +7,9 @@ void exec_prog(const char *filename);
 int run_prog(const char *filename);
 
 //
+void where_am_i(const char *file, const char *function, const int line);
+
+//
 void print_pwd(char *filename);
 
 //
