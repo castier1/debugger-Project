@@ -1,11 +1,16 @@
-#include <unistd.h>
+#include <elf.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <sys/ptrace.h>
+#include <sys/stat.h>
 #include <sys/types.h>
-#include <signal.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include "../header/lib.h"
 
@@ -15,7 +20,6 @@ void exec_prog(const char *filename)
     if (execl(filename, filename, 0, NULL) == -1)
         perror("\tERROR: exec_prog: ptrace");
 }
-
 
 int run_prog(const char *filename)
 {
@@ -27,6 +31,89 @@ int run_prog(const char *filename)
     return 0;
 }
 
+void *open_elf(char *filename)
+{
+    void *start = NULL;
+    struct stat stat;
+
+    int fd = open(filename, O_RDONLY, 660);
+    if(fd < 0)
+        perror("\tERROR : open_elf : open");
+
+    fstat(fd, &stat);
+
+    start = mmap(0, stat.st_size, PROT_READ , MAP_FILE | MAP_SHARED, fd, 0);
+    if(start == MAP_FAILED)
+    {
+        perror("\tERROR : open_elf : mmap");
+        abort();
+    }
+
+    if(*(char*)start != 0x7f || *((char*)start+1) != 'E' || *((char*)start+2) != 'L' || *((char*)start+3) != 'F')
+    {
+        perror("\tERROR : open_elf : not an ELF file");
+        return NULL;
+    }
+
+    return start;
+}
+
+void print_pwd(char *filename)
+{
+    char* path = realpath(filename, NULL);
+    if(!path){
+        perror("\tERROR : print_pwd : realpath");
+    }
+    else{
+        printf("\t%s\n", path);
+        free(path);
+    }
+}
+
+void get_source_file(char *filename)
+{
+    const char *to_ignore[2] = {"", "crtstuff.c"};
+    char *strtab;
+    int nb_symbols;
+    void *start = NULL;
+
+    char *source = NULL;
+    source = malloc(15 * sizeof(*source));
+
+    start = open_elf(filename);
+    if(!start)
+        perror("\tERROR : get_source_file : can't retrieve data");
+
+    Elf64_Ehdr* hdr = (Elf64_Ehdr *) start;
+    Elf64_Sym *symtab;
+    Elf64_Shdr *sections = (Elf64_Shdr*)((char*)start + hdr->e_shoff);
+
+    for (int i = 0; i < hdr->e_shnum; i++)
+    {
+        if (sections[i].sh_type == SHT_SYMTAB)
+        {
+            symtab = (Elf64_Sym*)((char*)start + sections[i].sh_offset);
+            nb_symbols = sections[i].sh_size / sections[i].sh_entsize;
+
+            strtab = (char*)((char*)start + sections[sections[i].sh_link].sh_offset);
+        }
+    }
+    for (int i = 0; i < nb_symbols; ++i)
+    {
+        if(symtab[i].st_info == STT_FILE)
+        {
+            char *tmp = strtab + symtab[i].st_name;
+            if(strcmp(tmp, to_ignore[0]) != 0 && strcmp(tmp, to_ignore[1]) != 0)
+                strcpy(source, tmp);
+        }
+    }
+
+    printf("\tfile source : %s\n", source);
+    print_pwd(source);
+
+    free(source);
+}
+
 void where_am_i(const char *file, const char *function, const int line)
 {
     // To call with : __FILE__, __FUNCTION__, __LINE__
@@ -34,16 +121,6 @@ void where_am_i(const char *file, const char *function, const int line)
 }
 
 
-void print_pwd(char *filename)
-{
-    char* path = realpath(filename, NULL);
-    if(!path)
-        printf("\tcannot find %s\n", filename);
-    else{
-        printf("\t%s\n", path);
-        free(path);
-    }
-}
 
 char *print_si_code(int si_signo, int si_code)
 {
@@ -218,22 +295,24 @@ void getsignal(pid_t child)
 
     char *s = print_si_code(sig.si_signo, sig.si_code);
     printf("\t%s %s\n", strsignal(sig.si_signo), s);
-    printf("\tadrr = %p\n", &sig.si_addr);
+    if(sig.si_signo != SIGTRAP)
+        printf("\tadrr = %p\n", &sig.si_addr);
 
     free(s);
 }
 
 void helpMsg()
 {
-    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
         "\thelp\t to show this message",
         "\texit\t to quit this interface",
         "\trun\t to run the program",
-        "\tsignal\t to list the last signal received",
+        "\tsignal\t to print the last signal received",
         "\tPID\t to print the PID",
         "\tPPID\t to print the PPID",
         "\tGID\t to print the GID",
-        "\tpwd\t to print the absolute path of the program to analyse");
+        "\tpwd\t to print the absolute path of the program to analyse",
+        "\tfile\t to print the name of the source code file");
 }
 
 void kill_child_process(pid_t child)
@@ -258,7 +337,7 @@ int start_UI(pid_t child, gid_t gid, char *filename)
 {
     int run = 1;
     char input[20];
-    const char *options[8] = {"help", "exit", "run", "signal", "PID", "PPID", "GID", "pwd"};
+    const char *options[9] = {"help", "exit", "run", "signal", "PID", "PPID", "GID", "pwd", "file"};
 
     while(run)
     {
@@ -283,6 +362,8 @@ int start_UI(pid_t child, gid_t gid, char *filename)
             printf("\t %d\n", gid);
         else if(strcmp(input, options[7]) == 0)
             print_pwd(filename);
+        else if(strcmp(input, options[8]) == 0)
+            get_source_file(filename);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }

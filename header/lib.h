@@ -1,10 +1,23 @@
 #pragma once
 
+
+/* ------- CHILD PROCESS ------- */
+
 //
 void exec_prog(const char *filename);
 
 // Run the given programm to analyse
 int run_prog(const char *filename);
+
+
+
+/* ------- PARENT PROCESS ------- */
+
+//
+void *open_elf(char *filename);
+
+//
+void get_source_file(char *filename);
 
 //
 void where_am_i(const char *file, const char *function, const int line);
