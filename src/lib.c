@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "../header/lib.h"
@@ -85,6 +86,9 @@ void print_metadata(const char *filename)
     print_mode(stat.st_mode);
     print_owner(stat.st_uid);
     printf("\tsize : %ld\n", stat.st_size);
+    printf("\tlast status change : %s", ctime(&stat.st_ctime));
+    printf("\tlast file access : %s", ctime(&stat.st_atime));
+    printf("\tlast file modification : %s", ctime(&stat.st_mtime));
 }
 
 void *open_elf(const char *filename)
@@ -369,7 +373,7 @@ void helpMsg()
         "\tpwd\t to print the absolute path of the program to analyse",
         "\tfile\t to print the name of the source code file",
         "\tmeta\t to print all the metadata of the file to analyse\
-           \n\t\t  (file type, mode, owner, file size)");
+           \n\t\t  (file type, mode, owner, file size, times)");
 }
 
 void kill_child_process(const pid_t child)

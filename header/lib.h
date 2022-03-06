@@ -14,6 +14,18 @@ int run_prog(const char *filename);
 /* ------- PARENT PROCESS ------- */
 
 //
+void print_filetype(const mode_t mode);
+
+//
+void print_mode(const mode_t mode);
+
+//
+void print_owner(uid_t uid);
+
+//
+void print_metadata(const char *filename);
+
+//
 void *open_elf(const char *filename);
 
 //
