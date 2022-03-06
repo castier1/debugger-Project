@@ -1,6 +1,7 @@
 #include <elf.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <pwd.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +32,62 @@ int run_prog(const char *filename)
     return 0;
 }
 
-void *open_elf(char *filename)
+void print_filetype(const mode_t mode)
+{
+    char buf[5];
+
+    if(S_ISSOCK(mode))
+        strcpy(buf, "sock");
+    else if(S_ISLNK(mode))
+        strcpy(buf, "link");
+    else if(S_ISREG(mode))
+        strcpy(buf, "file");
+    else if(S_ISBLK(mode) || S_ISCHR(mode))
+        strcpy(buf, "devc");
+    else if(S_ISDIR(mode))
+        strcpy(buf, "repy");
+    else if(S_ISFIFO(mode))
+        strcpy(buf, "fifo");
+    else
+        strcpy(buf, "und.");
+
+    printf("\ttype : %s\n", buf);
+}
+
+void print_mode(const mode_t mode)
+{
+    printf("\tmode : %c%c%c%c%c%c%c%c%c\n",
+        (S_IRUSR & mode) ? 'r' : '-',
+        (S_IWUSR & mode) ? 'w' : '-',
+        (S_IXUSR & mode) ? 'x' : '-',
+        (S_IRGRP & mode) ? 'r' : '-',
+        (S_IWGRP & mode) ? 'w' : '-',
+        (S_IXGRP & mode) ? 'x' : '-',
+        (S_IROTH & mode) ? 'r' : '-',
+        (S_IWOTH & mode) ? 'w' : '-',
+        (S_IXOTH & mode) ? 'x' : '-');
+}
+
+void print_owner(uid_t uid)
+{
+    struct passwd *pwd;
+    pwd = getpwuid(uid);
+    printf("\towner : %s\n", pwd->pw_name);
+}
+
+void print_metadata(const char *filename)
+{
+    struct stat stat;
+    lstat(filename, &stat);
+
+    printf("\tname : %s\n", filename);
+    print_filetype(stat.st_mode);
+    print_mode(stat.st_mode);
+    print_owner(stat.st_uid);
+    printf("\tsize : %ld\n", stat.st_size);
+}
+
+void *open_elf(const char *filename)
 {
     void *start = NULL;
     struct stat stat;
@@ -58,7 +114,7 @@ void *open_elf(char *filename)
     return start;
 }
 
-void print_pwd(char *filename)
+void print_pwd(const char *filename)
 {
     char* path = realpath(filename, NULL);
     if(!path){
@@ -70,7 +126,7 @@ void print_pwd(char *filename)
     }
 }
 
-void get_source_file(char *filename)
+void get_source_file(const char *filename)
 {
     const char *to_ignore[2] = {"", "crtstuff.c"};
     char *strtab;
@@ -109,7 +165,6 @@ void get_source_file(char *filename)
     }
 
     printf("\tfile source : %s\n", source);
-    print_pwd(source);
 
     free(source);
 }
@@ -122,7 +177,7 @@ void where_am_i(const char *file, const char *function, const int line)
 
 
 
-char *print_si_code(int si_signo, int si_code)
+char *print_si_code(const int si_signo, const int si_code)
 {
     char *s = calloc(76, sizeof(*s));
 
@@ -286,7 +341,7 @@ char *print_si_code(int si_signo, int si_code)
     return s;
 }
 
-void getsignal(pid_t child)
+void getsignal(const pid_t child)
 {
     siginfo_t sig;
 
@@ -303,7 +358,7 @@ void getsignal(pid_t child)
 
 void helpMsg()
 {
-    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
         "\thelp\t to show this message",
         "\texit\t to quit this interface",
         "\trun\t to run the program",
@@ -312,10 +367,12 @@ void helpMsg()
         "\tPPID\t to print the PPID",
         "\tGID\t to print the GID",
         "\tpwd\t to print the absolute path of the program to analyse",
-        "\tfile\t to print the name of the source code file");
+        "\tfile\t to print the name of the source code file",
+        "\tmeta\t to print all the metadata of the file to analyse\
+           \n\t\t  (file type, mode, owner, file size)");
 }
 
-void kill_child_process(pid_t child)
+void kill_child_process(const pid_t child)
 {
     if(ptrace(PTRACE_KILL, child, 0, 0) == -1)
         perror("\tERROR : resume : PTRACE_CONT");
@@ -325,7 +382,7 @@ void kill_child_process(pid_t child)
 
 }
 
-void resume(pid_t child)
+void resume(const pid_t child)
 {
     if(ptrace(PTRACE_CONT, child, 0, 0) == -1)
         perror("\tERROR : resume : PTRACE_CONT");
@@ -333,11 +390,12 @@ void resume(pid_t child)
 
 }
 
-int start_UI(pid_t child, gid_t gid, char *filename)
+int start_UI(const pid_t child, const gid_t gid, const char *filename)
 {
     int run = 1;
     char input[20];
-    const char *options[9] = {"help", "exit", "run", "signal", "PID", "PPID", "GID", "pwd", "file"};
+    const char *options[10] = {"help", "exit", "run", "signal", "PID",
+                               "PPID", "GID", "pwd", "file", "meta"};
 
     while(run)
     {
@@ -364,6 +422,8 @@ int start_UI(pid_t child, gid_t gid, char *filename)
             print_pwd(filename);
         else if(strcmp(input, options[8]) == 0)
             get_source_file(filename);
+        else if(strcmp(input, options[9]) == 0)
+            print_metadata(filename);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }
