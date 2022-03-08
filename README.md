@@ -27,14 +27,20 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 
 `./bin/main <path-to-file>`
 
+### Nettoyage
+
+`make clean`
+
 ## Exemple
 
 `make`
+
 `./bin/main bin/bad`
 
 or
 
 `make`
+
 `./bin/main bin/good`
 
 ## Autre
