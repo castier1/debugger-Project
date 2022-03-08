@@ -6,37 +6,38 @@
 
 #include "../header/lib.h"
 
-int main(int argc, char **argv )
+int main(int argc, char **argv)
 {
 	int status;
 	pid_t child = 0;
 	gid_t gid = 0;
 
 	if(argc != 2)
-		return printf("USAGE: ./main <prog_to_analyse>\n"), 1;
+		return printf("USAGE : ./main <prog_to_analyse>\n"), 1;
 
     child = fork();
+    // If fork failed
     if (child < 0)
         return printf("ERROR : main : fork failed"), 1;
-	else if(child == 0 )
+    // If in Child process
+	else if(child == 0)
 	{
-		// If in Child process
+		// Run the program given in parameters
 		if(run_prog(argv[1]) == -1)
-			printf("ERROR: main: run_prog\n");
+			return printf("ERROR : main : run_prog\n"), 1;
 
+		// Save the GroupID
 		gid = getgid();
-
-		printf("CHILD: child done\n");
 		exit(0);
 	}
-	else
-	{
-		//If in Parent process
-		waitpid(child, &status, 0);
+	//If in Parent process
+	else {
+		// Wait the child process stop
+		if(waitpid(child, &status, 0) == -1)
+			return printf("ERROR : main : waitpid\n") 1;
+		// Start the communication with user
 		if(start_UI(child, gid, argv[1]) == -1)
-			printf("ERROR: main: start_UI\n");
-
-		printf("PARENT: child done\n");
+			printf("ERROR : main : start_UI\n");
 	}
 
 	return 0;

@@ -25,11 +25,11 @@ void exec_prog(const char *filename)
 
 int run_prog(const char *filename)
 {
+    // Enable the ptrace system and stop (pause) the execution of this process
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1)
         return perror("\tERROR: run_prog: ptrace"), -1;
 
     exec_prog(filename);
-    
     return 0;
 }
 
@@ -37,18 +37,25 @@ void print_filetype(const mode_t mode)
 {
     char buf[5];
 
+    // SOCKET
     if(S_ISSOCK(mode))
         strcpy(buf, "sock");
+    // SYMBOLIC LINK
     else if(S_ISLNK(mode))
         strcpy(buf, "link");
+    // REGULAR FILE
     else if(S_ISREG(mode))
         strcpy(buf, "file");
+    // BLOCK SPECIAL or CHARACTER SPECIAL
     else if(S_ISBLK(mode) || S_ISCHR(mode))
         strcpy(buf, "devc");
+    // REPOSITORY
     else if(S_ISDIR(mode))
         strcpy(buf, "repy");
+    // FIFO
     else if(S_ISFIFO(mode))
         strcpy(buf, "fifo");
+    // UNDEFINED
     else
         strcpy(buf, "und.");
 
@@ -58,6 +65,7 @@ void print_filetype(const mode_t mode)
 void print_mode(const mode_t mode)
 {
     printf("\tmode : %c%c%c%c%c%c%c%c%c\n",
+        // S_I[Read/Write/eXecute][USeR/GRouP/OTHer]
         (S_IRUSR & mode) ? 'r' : '-',
         (S_IWUSR & mode) ? 'w' : '-',
         (S_IXUSR & mode) ? 'x' : '-',
@@ -81,11 +89,17 @@ void print_metadata(const char *filename)
     struct stat stat;
     lstat(filename, &stat);
 
+    // NAME
     printf("\tname : %s\n", filename);
+    // TYPE
     print_filetype(stat.st_mode);
+    // MODE
     print_mode(stat.st_mode);
+    // OWNER
     print_owner(stat.st_uid);
+    // SIZE
     printf("\tsize : %ld\n", stat.st_size);
+    // TIMES
     printf("\tlast status change : %s", ctime(&stat.st_ctime));
     printf("\tlast file access : %s", ctime(&stat.st_atime));
     printf("\tlast file modification : %s", ctime(&stat.st_mtime));
@@ -96,12 +110,15 @@ void *open_elf(const char *filename)
     void *start = NULL;
     struct stat stat;
 
+    // Open file in Read-only
     int fd = open(filename, O_RDONLY, 660);
     if(fd < 0)
         perror("\tERROR : open_elf : open");
 
+    // Capture the metadata of the file and stock it in stat structure
     fstat(fd, &stat);
 
+    // mmap in memory the file and stock the adress of the start of the file
     start = mmap(0, stat.st_size, PROT_READ , MAP_FILE | MAP_SHARED, fd, 0);
     if(start == MAP_FAILED)
     {
@@ -109,25 +126,16 @@ void *open_elf(const char *filename)
         abort();
     }
 
-    if(*(char*)start != 0x7f || *((char*)start+1) != 'E' || *((char*)start+2) != 'L' || *((char*)start+3) != 'F')
+    // Verify that this is an ELF-file (check the firsts bytes)
+    if(*(char*)start != 0x7f || *((char*)start+1) != 'E'
+       || *((char*)start+2) != 'L' || *((char*)start+3) != 'F')
     {
         perror("\tERROR : open_elf : not an ELF file");
         return NULL;
     }
 
+    // Return a pointer to the start of the mmap file
     return start;
-}
-
-void print_pwd(const char *filename)
-{
-    char* path = realpath(filename, NULL);
-    if(!path){
-        perror("\tERROR : print_pwd : realpath");
-    }
-    else{
-        printf("\t%s\n", path);
-        free(path);
-    }
 }
 
 void get_source_file(const char *filename)
@@ -140,16 +148,21 @@ void get_source_file(const char *filename)
     char *source = NULL;
     source = malloc(15 * sizeof(*source));
 
+    // Open the elf-file
     start = open_elf(filename);
     if(!start)
         perror("\tERROR : get_source_file : can't retrieve data");
 
+    // Capture (and cast) a pointer on the headers
     Elf64_Ehdr* hdr = (Elf64_Ehdr *) start;
-    Elf64_Sym *symtab;
+    // Capture (and cast) a pointer on the sections
     Elf64_Shdr *sections = (Elf64_Shdr*)((char*)start + hdr->e_shoff);
+    Elf64_Sym *symtab;
 
+    // Parse all the sections
     for (int i = 0; i < hdr->e_shnum; i++)
     {
+        // Stock only the datas in the table of symbols
         if (sections[i].sh_type == SHT_SYMTAB)
         {
             symtab = (Elf64_Sym*)((char*)start + sections[i].sh_offset);
@@ -158,8 +171,10 @@ void get_source_file(const char *filename)
             strtab = (char*)((char*)start + sections[sections[i].sh_link].sh_offset);
         }
     }
+    // Parse all the symbols stocked
     for (int i = 0; i < nb_symbols; ++i)
     {
+        // If it's type is "FILE", check it and print it
         if(symtab[i].st_info == STT_FILE)
         {
             char *tmp = strtab + symtab[i].st_name;
@@ -169,8 +184,18 @@ void get_source_file(const char *filename)
     }
 
     printf("\tfile source : %s\n", source);
-
     free(source);
+}
+
+void print_pwd(const char *filename)
+{
+    char* path = realpath(filename, NULL);
+    if(!path)
+        perror("\tERROR : print_pwd : realpath");
+    else {
+        printf("\t%s\n", path);
+        free(path);
+    }
 }
 
 void where_am_i(const char *file, const char *function, const int line)
@@ -178,8 +203,6 @@ void where_am_i(const char *file, const char *function, const int line)
     // To call with : __FILE__, __FUNCTION__, __LINE__
     fprintf(stdout, "\tfile: %s, function : %s, line : %d\n", file, function, line);
 }
-
-
 
 char *print_si_code(const int si_signo, const int si_code)
 {
@@ -318,7 +341,7 @@ char *print_si_code(const int si_signo, const int si_code)
             in = 1;
             break;
     }
-
+    // If signo == 0, the signal detected is not an error.
     if (in){
         switch(si_code){
             case SI_USER:
@@ -349,11 +372,15 @@ void getsignal(const pid_t child)
 {
     siginfo_t sig;
 
+    // Fill the siginfo_t structure
     if(ptrace(PTRACE_GETSIGINFO, child, NULL, &sig) == -1)
         perror("\tERROR : getsignal : PTRACE_GETSIGINFO");
 
+    // Print the signal and it's short description
     char *s = print_si_code(sig.si_signo, sig.si_code);
     printf("\t%s %s\n", strsignal(sig.si_signo), s);
+
+    // Print the addresse where the signal was raised
     if(sig.si_signo != SIGTRAP)
         printf("\tadrr = %p\n", &sig.si_addr);
 
@@ -378,18 +405,24 @@ void helpMsg()
 
 void kill_child_process(const pid_t child)
 {
+    // Kill the child process to stop it
     if(ptrace(PTRACE_KILL, child, 0, 0) == -1)
-        perror("\tERROR : resume : PTRACE_CONT");
+        perror("\tERROR : kill_child_process : PTRACE_KILL");
     else
         printf("\tProcess %d killed\n", child);
+
+    // Wait 1 sec
     sleep(1);
 
 }
 
 void resume(const pid_t child)
 {
+    // Resume the execution of the child process
     if(ptrace(PTRACE_CONT, child, 0, 0) == -1)
         perror("\tERROR : resume : PTRACE_CONT");
+
+    // Wait 1 sec
     sleep(1);
 
 }
@@ -406,26 +439,36 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
         printf("analyse >>> ");
         scanf("%s", input);
 
+        // HELP
         if(strcmp(input, options[0]) == 0)
             helpMsg();
+        // EXIT
         else if(strcmp(input, options[1]) == 0){
             run = 0;
             kill_child_process(child);
         }
+        // RUN
         else if(strcmp(input, options[2]) == 0)
             resume(child);
+        // SIGNAL
         else if(strcmp(input, options[3]) == 0)
             getsignal(child);
+        // PID
         else if(strcmp(input, options[4]) == 0)
             printf("\t %d\n", child);
+        // PPID
         else if(strcmp(input, options[5]) == 0)
             printf("\t %d\n", getpid());
+        // GID
         else if(strcmp(input, options[6]) == 0)
             printf("\t %d\n", gid);
+        // PWD
         else if(strcmp(input, options[7]) == 0)
             print_pwd(filename);
+        // FILE
         else if(strcmp(input, options[8]) == 0)
             get_source_file(filename);
+        // META
         else if(strcmp(input, options[9]) == 0)
             print_metadata(filename);
         else
