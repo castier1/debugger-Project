@@ -1,4 +1,4 @@
-# AISE-Project - Analyse de processus en cours d’exécutio
+# Analyse de processus en cours d’exécutio
 
 ## Description
 
