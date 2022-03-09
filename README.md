@@ -15,6 +15,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `PID`: pour avoir le ProcessusID du programme analysé.
 * `PPID`: pour avoir le ProcessusID de l'applications (programme qui analyse).
 * `GID` : pour avoir le GroupID du programme analysé.
+* `PGID`: pour avoir le GroupID de l'applications (programme qui analyse).
 * `pwd` : pour avoir le chemin absolu dans la machine (si possible) du programme analysé.
 * `file`: pour avoir le nom du fichier source du programme analysé.
 * `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates)

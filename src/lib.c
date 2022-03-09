@@ -389,14 +389,15 @@ void getsignal(const pid_t child)
 
 void helpMsg()
 {
-    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
         "\thelp\t to show this message",
         "\texit\t to quit this interface",
         "\trun\t to run the program",
         "\tsignal\t to print the last signal received",
         "\tPID\t to print the PID",
-        "\tPPID\t to print the PPID",
+        "\tPPID\t to print the Parent PID",
         "\tGID\t to print the GID",
+        "\tPGID\t to print the Parent GID",
         "\tpwd\t to print the absolute path of the program to analyse",
         "\tfile\t to print the name of the source code file",
         "\tmeta\t to print all the metadata of the file to analyse\
@@ -431,8 +432,9 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
 {
     int run = 1;
     char input[20];
-    const char *options[10] = {"help", "exit", "run", "signal", "PID",
-                               "PPID", "GID", "pwd", "file", "meta"};
+    const char *options[11] = {"help", "exit", "run", "signal", "PID",
+                               "PPID", "GID", "PGID", "pwd", "file",
+                               "meta"};
 
     while(run)
     {
@@ -462,14 +464,17 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
         // GID
         else if(strcmp(input, options[6]) == 0)
             printf("\t %d\n", gid);
-        // PWD
+        // PGID
         else if(strcmp(input, options[7]) == 0)
+            printf("\t %d\n", getgid());
+        // PWD
+        else if(strcmp(input, options[8]) == 0)
             print_pwd(filename);
         // FILE
-        else if(strcmp(input, options[8]) == 0)
+        else if(strcmp(input, options[9]) == 0)
             get_source_file(filename);
         // META
-        else if(strcmp(input, options[9]) == 0)
+        else if(strcmp(input, options[10]) == 0)
             print_metadata(filename);
         else
             printf("\t\"%s\" : unknown command\n", input);
