@@ -5,14 +5,14 @@ CC=gcc
 
 # --- EXECUTIONS --- #
 
-run: bin/main bin/bad bin/good
+run: analyzer bin/bad bin/good
 	./$< bin/good
 	./$< bin/bad
 
 
 # --- COMPILATIONS --- #
 
-bin/main: src/main.c bin/lib
+analyzer: src/main.c bin/lib
 	$(CC) -Wall -g -o $@ $^
 
 bin/lib: src/lib.c
@@ -28,4 +28,4 @@ bin/good: src/good.c
 # --- CLEANNING --- #
 
 clean:
-	rm -f bin/*.o bin/main bin/bad bin/good bin/lib
+	rm -f bin/*.o bin/bad bin/good bin/lib analyzer

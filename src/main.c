@@ -12,8 +12,9 @@ int main(int argc, char **argv)
 	pid_t child = 0;
 	gid_t gid = 0;
 
-	if(argc != 2)
-		return printf("USAGE : ./main <prog_to_analyse>\n"), 1;
+	if(argc == 1)
+		return printf("USAGE : ./analyzer [--args] <prog_to_analyse> [arg1 arg2 ...]\n"), 1;
+
 
     child = fork();
     // If fork failed
@@ -34,7 +35,7 @@ int main(int argc, char **argv)
 	else {
 		// Wait the child process stop
 		if(waitpid(child, &status, 0) == -1)
-			return printf("ERROR : main : waitpid\n") 1;
+			return printf("ERROR : main : waitpid\n"), 1;
 		// Start the communication with user
 		if(start_UI(child, gid, argv[1]) == -1)
 			printf("ERROR : main : start_UI\n");

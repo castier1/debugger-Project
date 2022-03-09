@@ -29,15 +29,15 @@ Pour lancer la compilation et la création de l'executable, il suffit de lancer 
 
 Pour pouvoir analyser un programme exterieur, lancer la commande:
 
-`./bin/main <path-to-file>`
+`./analyzer <path-to-file>`
 
 Si le programme a besoin d'arguments, lancer la commande:
 
-`./bin/main --args <path-to-file> arg1 arg2 ...`
+`./analyzer --args <path-to-file> arg1 arg2 ...`
 
 ### Nettoyage
 
-La commande `make clean` permettera de nettoyer le dossier `bin/` et de supprimer l'executable.
+La commande `make clean` permettera de nettoyer le dossier `bin/` et de supprimer l'executable `analyzer`.
 
 ## Exemple
 ### good
@@ -45,7 +45,7 @@ La suite de commandes:
 
 1. `make`
 2. `make good`
-3. `./bin/main bin/good`
+3. `./analyzer bin/good`
 
 permettent de tester le binaire créé d'après le programme `good.c`dans `src/`. Celui-ci est un programme simple ne générant pas d'erreur.
 
@@ -54,7 +54,7 @@ La suite de commandes:
 
 1. `make`
 2. `make bad`
-3. `./bin/main bin/bad`
+3. `./analyzer bin/bad`
 
 permettent de tester le binaire créé d'après le programme `bad.c`dans `src/`. Celui-ci est un programme simple générant une erreur de segmentation.
 

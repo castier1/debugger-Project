@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
 	int var = 5;
 
 	first_function();
-	//second_function(var);
+	second_function(var);
 
 	return 0;
 }
