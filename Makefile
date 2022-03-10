@@ -1,11 +1,12 @@
 # --- DEFINITIONS --- #
 
 CC=gcc
-.PHONY: run clean
+CFLAGS= -Wall -g
+.PHONY: analyzer clean
 
 # --- EXECUTIONS --- #
 
-run: analyzer bin/bad bin/good
+test: analyzer bad good
 	./$< bin/good
 	./$< bin/bad
 
@@ -13,16 +14,16 @@ run: analyzer bin/bad bin/good
 # --- COMPILATIONS --- #
 
 analyzer: src/main.c bin/lib
-	$(CC) -Wall -g -o $@ $^
+	$(CC)  -o $@ $^
 
 bin/lib: src/lib.c
-	$(CC) -Wall -c -o $@ $^
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 
-bin/%: src/%.c
-	$(CC) -Wall -g -o $@ $<
-bin/bad: src/bad.c
-bin/good: src/good.c
+%: src/%.c
+	$(CC) $(CFLAGS) -o bin/$@ $<
+bad: src/bad.c
+good: src/good.c
 
 
 # --- CLEANNING --- #

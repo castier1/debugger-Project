@@ -20,7 +20,7 @@
 void exec_prog(const char *filename)
 {
     if (execl(filename, filename, 0, NULL) == -1)
-        perror("\tERROR: exec_prog: ptrace");
+        perror("\tERROR: exec_prog: execv");
 }
 
 int run_prog(const char *filename)
