@@ -6,7 +6,7 @@
 
 #include "../header/lib.h"
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	int status;
 	pid_t child = 0;

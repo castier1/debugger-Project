@@ -17,13 +17,13 @@
 #include "../header/lib.h"
 
 
-void exec_prog(const char **argv)
+void exec_prog(char * const *argv)
 {
-    if (execv(argv[0], argv, 0, NULL) == -1)
+    if (execv(argv[0], argv) == -1)
         perror("\tERROR: exec_prog: ptrace");
 }
 
-int run_prog(const char **argv)
+int run_prog(char * const* argv)
 {
     // Enable the ptrace system and stop (pause) the execution of this process
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1)
