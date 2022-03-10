@@ -12,9 +12,11 @@ int main(int argc, char **argv)
 	pid_t child = 0;
 	gid_t gid = 0;
 
-	if(argc == 1)
-		return printf("USAGE : ./analyzer [--args] <prog_to_analyse> [arg1 arg2 ...]\n"), 1;
+	if(argc < 2)
+		return printf("USAGE : ./analyzer <prog_to_analyse> [arg1 arg2 ...]\n"), 1;
 
+	argv++;
+	argc--;
 
     child = fork();
     // If fork failed
@@ -24,7 +26,7 @@ int main(int argc, char **argv)
 	else if(child == 0)
 	{
 		// Run the program given in parameters
-		if(run_prog(argv[1]) == -1)
+		if(run_prog(argv) == -1)
 			return printf("ERROR : main : run_prog\n"), 1;
 
 		// Save the GroupID
@@ -37,7 +39,7 @@ int main(int argc, char **argv)
 		if(waitpid(child, &status, 0) == -1)
 			return printf("ERROR : main : waitpid\n"), 1;
 		// Start the communication with user
-		if(start_UI(child, gid, argv[1]) == -1)
+		if(start_UI(child, gid, argv[0]) == -1)
 			printf("ERROR : main : start_UI\n");
 	}
 

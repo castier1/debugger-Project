@@ -17,19 +17,19 @@
 #include "../header/lib.h"
 
 
-void exec_prog(const char *filename)
+void exec_prog(const char **argv)
 {
-    if (execl(filename, filename, 0, NULL) == -1)
+    if (execl(argv[0], argv, 0, NULL) == -1)
         perror("\tERROR: exec_prog: ptrace");
 }
 
-int run_prog(const char *filename)
+int run_prog(const char **argv)
 {
     // Enable the ptrace system and stop (pause) the execution of this process
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1)
         return perror("\tERROR: run_prog: ptrace"), -1;
 
-    exec_prog(filename);
+    exec_prog(argv);
     return 0;
 }
 

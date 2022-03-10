@@ -4,10 +4,10 @@
 /* ------- CHILD PROCESS ------- */
 
 // Start program execution
-void exec_prog(const char *filename);
+void exec_prog(const char **argv);
 
 // Run the given program and active ptrace
-int run_prog(const char *filename);
+int run_prog(const char **argv);
 
 
 
