@@ -19,7 +19,7 @@
 
 void exec_prog(const char **argv)
 {
-    if (execl(argv[0], argv, 0, NULL) == -1)
+    if (execv(argv[0], argv, 0, NULL) == -1)
         perror("\tERROR: exec_prog: ptrace");
 }
 
