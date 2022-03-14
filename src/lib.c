@@ -19,6 +19,7 @@
 
 void exec_prog(char * const *argv)
 {
+    // argv = path_to_file, argument1, argument2, ..., NULL
     if (execv(argv[0], argv) == -1)
         perror("\tERROR: exec_prog: ptrace");
 }
@@ -244,7 +245,6 @@ void where_am_i(const char *file, const char *function, const int line)
 char *print_si_code(const int si_signo, const int si_code)
 {
     char *s = calloc(76, sizeof(*s));
-
     int in = 0;
 
     switch(si_signo){
