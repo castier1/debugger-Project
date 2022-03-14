@@ -33,6 +33,43 @@ int run_prog(char * const* argv)
     return 0;
 }
 
+void print_lib(const pid_t child)
+{
+    // Retrieve the filename
+    char filename[20];
+    sprintf(filename, "/proc/%d/maps", child);
+
+    // Open the file
+    FILE *file;
+    file = fopen(filename, "r");
+    if(!file)
+        perror("\tERROR : print_lib : unable to open /proc/[pid]/maps");
+
+    char buff[512], libname[100], old_libname[100] = "null";
+
+    // Parse the file, line by line
+    while(fgets(buff, 512, file))
+    {
+        // Parse (and split) the string, and keep only the last part
+        char delim[] = " ";
+        char *ptr = strtok(buff, delim);
+        while(ptr != NULL)
+        {
+            strcpy(libname, ptr);
+            ptr = strtok(NULL, delim);
+        }
+
+        // Check if already found and keep only path to libraries (to remove [stack], [heap], etc)
+        if(strcmp(libname, old_libname) != 0 && libname[0] == '/')
+            printf("\t%s", libname);
+
+        strcpy(old_libname, libname);
+    }
+
+    // Close the file
+    fclose(file);
+}
+
 void print_filetype(const mode_t mode)
 {
     char buf[5];
@@ -389,7 +426,7 @@ void getsignal(const pid_t child)
 
 void helpMsg()
 {
-    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
         "\thelp\t to show this message",
         "\texit\t to quit this interface",
         "\trun\t to run the program",
@@ -401,7 +438,8 @@ void helpMsg()
         "\tpwd\t to print the absolute path of the program to analyse",
         "\tfile\t to print the name of the source code file",
         "\tmeta\t to print all the metadata of the file to analyse\
-           \n\t\t  (file type, mode, owner, file size, times)");
+           \n\t\t  (file type, mode, owner, file size, times)",
+        "\tlib\t to print the list of all the dynamic librairies loaded");
 }
 
 void kill_child_process(const pid_t child)
@@ -432,9 +470,9 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
 {
     int run = 1;
     char input[20];
-    const char *options[11] = {"help", "exit", "run", "signal", "PID",
+    const char *options[12] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
-                               "meta"};
+                               "meta", "lib"};
 
     while(run)
     {
@@ -476,6 +514,9 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
         // META
         else if(strcmp(input, options[10]) == 0)
             print_metadata(filename);
+        // LIB
+        else if(strcmp(input, options[11]) == 0)
+            print_lib(child);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }

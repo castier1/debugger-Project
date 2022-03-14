@@ -19,6 +19,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `pwd` : pour avoir le chemin absolu dans la machine (si possible) du programme analysé.
 * `file`: pour avoir le nom du fichier source du programme analysé.
 * `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates)
+* `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées
 
 ## Utilisation
 
@@ -35,6 +36,34 @@ Pour pouvoir analyser un programme exterieur, lancer la commande:
 Si le programme a besoin d'arguments, lancer la commande:
 
 `./analyzer <path-to-file> arg1 arg2 ...`
+
+### Commandes
+
+La communication avec l'analyseur se fait via l'ensemble des commandes présentées dans la partie Fonctionalités.
+
+Par exemple:
+```bash
+analyze >>> help
+	help	to show this message
+	exit	to quit this interface
+	run	 	to run the program
+	signal	to print the last signal received
+	PID	 	to print the PID
+	PPID	to print the Parent PID
+	GID	 	to print the GID
+	PGID	to print the Parent GID
+	pwd	 	to print the absolute path of the program to analyse
+	file	to print the name of the source code file
+	meta	to print all the metadata of the file to analyse
+		     (file type, mode, owner, file size, times)
+	file	to print the list of all the dynamic librairies loaded
+analyse >>> PID
+	 71776
+analyse >>> PPID
+	 71775
+analyse >>> exit
+	Process 71776 killed
+```
 
 ### Nettoyage
 

@@ -1,7 +1,7 @@
 # --- DEFINITIONS --- #
 
 CC=gcc
-CFLAGS= -Wall -g
+CFLAGS= -g
 .PHONY: analyzer clean
 
 # --- EXECUTIONS --- #
@@ -14,7 +14,7 @@ test: analyzer bad good
 # --- COMPILATIONS --- #
 
 analyzer: src/main.c bin/lib
-	$(CC)  -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 bin/lib: src/lib.c
 	$(CC) $(CFLAGS) -c -o $@ $^

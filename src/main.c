@@ -25,12 +25,13 @@ int main(int argc, char *argv[])
     // If in Child process
 	else if(child == 0)
 	{
+		// Save the GroupID
+		gid = getgid();
+
 		// Run the program given in parameters
 		if(run_prog(argv) == -1)
 			return printf("ERROR : main : run_prog\n"), 1;
 
-		// Save the GroupID
-		gid = getgid();
 		exit(0);
 	}
 	//If in Parent process
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
 			return printf("ERROR : main : waitpid\n"), 1;
 		// Start the communication with user
 		if(start_UI(child, gid, argv[0]) == -1)
-			printf("ERROR : main : start_UI\n");
+			return printf("ERROR : main : start_UI\n"), 1;
 	}
 
 	return 0;

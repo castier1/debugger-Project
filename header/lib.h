@@ -1,6 +1,5 @@
 #pragma once
 
-
 /* ------- CHILD PROCESS ------- */
 
 // Start program execution
@@ -12,6 +11,9 @@ int run_prog(char * const* argv);
 
 
 /* ------- PARENT PROCESS ------- */
+
+// Print all the loaded dynamic librairies
+void print_lib(const pid_t child);
 
 // Print the file type
 void print_filetype(const mode_t mode);
