@@ -21,6 +21,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates)
 * `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées
 * `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé
+* `func`: pour afficher l'ensemble des fonctions du programme analysé.
 
 ## Utilisation
 
@@ -59,6 +60,7 @@ analyze >>> help
 	         (file type, mode, owner, file size, times)
 	file    to print the list of all the dynamic librairies loaded
 	fd      to print all the file descriptor opened
+	func    to print all the function of the program to analyse
 analyse >>> PID
 	 71776
 analyse >>> PPID
