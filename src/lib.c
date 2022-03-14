@@ -505,7 +505,7 @@ void resume(const pid_t child)
 
 }
 
-int start_UI(const pid_t child, const gid_t gid, const char *filename)
+int start_UI(const pid_t child, const char *filename)
 {
     int run = 1;
     char input[20];
@@ -540,7 +540,7 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
             printf("\t %d\n", getpid());
         // GID
         else if(strcmp(input, options[6]) == 0)
-            printf("\t %d\n", gid);
+            printf("\t %d\n", getgid());
         // PGID
         else if(strcmp(input, options[7]) == 0)
             printf("\t %d\n", getgid());

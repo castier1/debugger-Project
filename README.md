@@ -45,20 +45,20 @@ La communication avec l'analyseur se fait via l'ensemble des commandes prÃ©sentÃ
 Par exemple:
 ```
 analyze >>> help
-	help	to show this message
-	exit	to quit this interface
-	run	 	to run the program
-	signal	to print the last signal received
-	PID	 	to print the PID
-	PPID	to print the Parent PID
-	GID	 	to print the GID
-	PGID	to print the Parent GID
-	pwd	 	to print the absolute path of the program to analyse
-	file	to print the name of the source code file
-	meta	to print all the metadata of the file to analyse
-		     (file type, mode, owner, file size, times)
-	file	to print the list of all the dynamic librairies loaded
-	fd	 	to print all the file descriptor opened
+	help    to show this message
+	extit   to quit this interface
+	run     to run the program
+	signal  to print the last signal received
+	PID     to print the PID
+	PPID    to print the Parent PID
+	GID     to print the GID
+	PGID    to print the Parent GID
+	pwd     to print the absolute path of the program to analyse
+	file    to print the name of the source code file
+	meta    to print all the metadata of the file to analyse
+	         (file type, mode, owner, file size, times)
+	file    to print the list of all the dynamic librairies loaded
+	fd      to print all the file descriptor opened
 analyse >>> PID
 	 71776
 analyse >>> PPID

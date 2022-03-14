@@ -58,4 +58,4 @@ void kill_child_process(const pid_t child);
 void resume(const pid_t child);
 
 // Start the analyse (with user's interface)
-int start_UI(const pid_t child, const gid_t gid, const char *filename);
+int start_UI(const pid_t child, const char *filename);

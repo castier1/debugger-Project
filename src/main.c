@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
 {
 	int status;
 	pid_t child = 0;
-	gid_t gid = 0;
 
 	if(argc < 2)
 		return printf("USAGE : ./analyzer <prog_to_analyse> [arg1 arg2 ...]\n"), 1;
@@ -25,9 +24,6 @@ int main(int argc, char *argv[])
     // If in Child process
 	else if(child == 0)
 	{
-		// Save the GroupID
-		gid = getgid();
-
 		// Run the program given in parameters
 		if(run_prog(argv) == -1)
 			return printf("ERROR : main : run_prog\n"), 1;
@@ -40,7 +36,7 @@ int main(int argc, char *argv[])
 		if(waitpid(child, &status, 0) == -1)
 			return printf("ERROR : main : waitpid\n"), 1;
 		// Start the communication with user
-		if(start_UI(child, gid, argv[0]) == -1)
+		if(start_UI(child, argv[0]) == -1)
 			return printf("ERROR : main : start_UI\n"), 1;
 	}
 
