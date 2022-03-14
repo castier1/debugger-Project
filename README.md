@@ -20,6 +20,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `file`: pour avoir le nom du fichier source du programme analysé.
 * `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates)
 * `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées
+* `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé
 
 ## Utilisation
 
@@ -42,7 +43,7 @@ Si le programme a besoin d'arguments, lancer la commande:
 La communication avec l'analyseur se fait via l'ensemble des commandes présentées dans la partie Fonctionalités.
 
 Par exemple:
-```bash
+```
 analyze >>> help
 	help	to show this message
 	exit	to quit this interface
@@ -57,6 +58,7 @@ analyze >>> help
 	meta	to print all the metadata of the file to analyse
 		     (file type, mode, owner, file size, times)
 	file	to print the list of all the dynamic librairies loaded
+	fd	 	to print all the file descriptor opened
 analyse >>> PID
 	 71776
 analyse >>> PPID

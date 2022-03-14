@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <elf.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -32,6 +33,41 @@ int run_prog(char * const* argv)
 
     exec_prog(argv);
     return 0;
+}
+
+void print_file_descr(const pid_t child)
+{
+    // Retrieve the directory name
+    char dirname[20];
+    sprintf(dirname, "/proc/%d/fd/", child);
+
+    DIR* dir = opendir(dirname);
+    if(!dir)
+        perror("\tERROR : print_open_files : opendir");
+
+    struct dirent * entry = NULL;
+    while((entry = readdir(dir)) != NULL)
+    {
+        //printf("%s of type %s\n", entry->d_name, file_type(entry->d_type));
+        if(entry->d_type == DT_LNK)
+        {
+            char filename[512], linkname[512];
+            sprintf(filename, "/proc/%d/fd/%s", child, entry->d_name);
+
+            struct stat stat;
+            if((lstat(filename, &stat)) == -1)
+                perror("\tERROR : print_open_files : lstat");
+
+            if((readlink(filename, linkname, stat.st_size + 1)) == -1)
+                perror("\tERROR : print_open_files : readlink");
+
+            //linkname[49] = '\0';
+            printf("\t%s\n", linkname);
+
+        }
+    }
+    closedir(dir);
+
 }
 
 void print_lib(const pid_t child)
@@ -125,7 +161,8 @@ void print_owner(uid_t uid)
 void print_metadata(const char *filename)
 {
     struct stat stat;
-    lstat(filename, &stat);
+    if(lstat(filename, &stat) == -1)
+        perror("\tERROR : print_metadata : lstat");
 
     // NAME
     printf("\tname : %s\n", filename);
@@ -154,7 +191,8 @@ void *open_elf(const char *filename)
         perror("\tERROR : open_elf : open");
 
     // Capture the metadata of the file and stock it in stat structure
-    fstat(fd, &stat);
+    if(fstat(fd, &stat) == -1)
+        perror("\tERROR : open_elf : fstat");
 
     // mmap in memory the file and stock the adress of the start of the file
     start = mmap(0, stat.st_size, PROT_READ , MAP_FILE | MAP_SHARED, fd, 0);
@@ -426,7 +464,7 @@ void getsignal(const pid_t child)
 
 void helpMsg()
 {
-    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
         "\thelp\t to show this message",
         "\texit\t to quit this interface",
         "\trun\t to run the program",
@@ -439,7 +477,8 @@ void helpMsg()
         "\tfile\t to print the name of the source code file",
         "\tmeta\t to print all the metadata of the file to analyse\
            \n\t\t  (file type, mode, owner, file size, times)",
-        "\tlib\t to print the list of all the dynamic librairies loaded");
+        "\tlib\t to print the list of all the dynamic librairies loaded",
+        "\tfd\t to print all the file descriptor opened");
 }
 
 void kill_child_process(const pid_t child)
@@ -470,9 +509,9 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
 {
     int run = 1;
     char input[20];
-    const char *options[12] = {"help", "exit", "run", "signal", "PID",
+    const char *options[13] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
-                               "meta", "lib"};
+                               "meta", "lib", "fd"};
 
     while(run)
     {
@@ -517,6 +556,9 @@ int start_UI(const pid_t child, const gid_t gid, const char *filename)
         // LIB
         else if(strcmp(input, options[11]) == 0)
             print_lib(child);
+        // FD
+        else if(strcmp(input, options[12]) == 0)
+            print_file_descr(child);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }
