@@ -6,9 +6,18 @@ CFLAGS= -g
 
 # --- EXECUTIONS --- #
 
-test: analyzer bad good
-	./$< bin/good
-	./$< bin/bad
+run: bad good
+	./analyzer bin/good
+	./analyzer bin/bad
+
+
+# --- EXAMPLES --- #
+
+%: src/%.c analyzer
+	$(CC) $(CFLAGS) -o bin/$@ $<
+
+bad: src/bad.c
+good: src/good.c
 
 
 # --- COMPILATIONS --- #
@@ -18,12 +27,6 @@ analyzer: src/main.c bin/lib
 
 bin/lib: src/lib.c
 	$(CC) $(CFLAGS) -c -o $@ $^
-
-
-%: src/%.c
-	$(CC) $(CFLAGS) -o bin/$@ $<
-bad: src/bad.c
-good: src/good.c
 
 
 # --- CLEANNING --- #

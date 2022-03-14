@@ -73,22 +73,20 @@ analyse >>> exit
 
 La commande `make clean` permettera de nettoyer le dossier `bin/` et de supprimer l'executable `analyzer`.
 
-## Exemple
+## Exemples
 ### good
 La suite de commandes:
 
-1. `make`
-2. `make good`
-3. `./analyzer bin/good`
+1. `make good`
+2. `./analyzer bin/good`
 
 permettent de tester le binaire créé d'après le programme `good.c`dans `src/`. Celui-ci est un programme simple ne générant pas d'erreur.
 
 ### bad
 La suite de commandes:
 
-1. `make`
-2. `make bad`
-3. `./analyzer bin/bad`
+1. `make bad`
+2. `./analyzer bin/bad`
 
 permettent de tester le binaire créé d'après le programme `bad.c`dans `src/`. Celui-ci est un programme simple générant une erreur de segmentation.
 
