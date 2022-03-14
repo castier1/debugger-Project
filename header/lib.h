@@ -33,8 +33,8 @@ void print_metadata(const char *filename);
 // Check and open an elf file
 void *open_elf(const char *filename);
 
-// Parse an elf file and retrieve it's source file name
-void get_source_file(const char *filename);
+// Parse an elf file and retrieve data: source file name or functions name
+void parse_symtab(const char *filename, unsigned char TYPE);
 
 // [NOT-USED-YET] Print the current location of this funcion
 void where_am_i(const char *file, const char *function, const int line);

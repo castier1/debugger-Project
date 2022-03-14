@@ -214,15 +214,12 @@ void *open_elf(const char *filename)
     return start;
 }
 
-void get_source_file(const char *filename)
+void parse_symtab(const char *filename, unsigned char TYPE)
 {
     const char *to_ignore[2] = {"", "crtstuff.c"};
     char *strtab;
     int nb_symbols;
     void *start = NULL;
-
-    char *source = NULL;
-    source = malloc(15 * sizeof(*source));
 
     // Open the elf-file
     start = open_elf(filename);
@@ -247,20 +244,32 @@ void get_source_file(const char *filename)
             strtab = (char*)((char*)start + sections[sections[i].sh_link].sh_offset);
         }
     }
-    // Parse all the symbols stocked
-    for (int i = 0; i < nb_symbols; ++i)
+    switch(TYPE)
     {
-        // If it's type is "FILE", check it and print it
-        if(symtab[i].st_info == STT_FILE)
-        {
-            char *tmp = strtab + symtab[i].st_name;
-            if(strcmp(tmp, to_ignore[0]) != 0 && strcmp(tmp, to_ignore[1]) != 0)
-                strcpy(source, tmp);
-        }
-    }
+        case STT_FILE:
+            // Parse all the symbols stocked
+            for (int i = 0; i < nb_symbols; ++i)
+            {
+                // If it's type is "FILE", check it and print it
+                if(symtab[i].st_info == STT_FILE)
+                {
+                    char *tmp = strtab + symtab[i].st_name;
+                    if(strcmp(tmp, to_ignore[0]) != 0 && strcmp(tmp, to_ignore[1]) != 0)
+                        printf("\tfile source : %s\n", tmp);
+                }
+            }
+            break;
 
-    printf("\tfile source : %s\n", source);
-    free(source);
+        case STT_FUNC:
+            // Parse all the symbols stocked
+            for (int i = 0; i < nb_symbols; ++i)
+            {
+                // If it's type is "FUNC", check it and print it
+                if(symtab[i].st_info == STT_FUNC || symtab[i].st_info == 18)
+                    printf("\t%s\n", strtab + symtab[i].st_name);
+            }
+            break;
+    }
 }
 
 void print_pwd(const char *filename)
@@ -464,7 +473,7 @@ void getsignal(const pid_t child)
 
 void helpMsg()
 {
-    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
         "\thelp\t to show this message",
         "\texit\t to quit this interface",
         "\trun\t to run the program",
@@ -478,7 +487,8 @@ void helpMsg()
         "\tmeta\t to print all the metadata of the file to analyse\
            \n\t\t  (file type, mode, owner, file size, times)",
         "\tlib\t to print the list of all the dynamic librairies loaded",
-        "\tfd\t to print all the file descriptor opened");
+        "\tfd\t to print all the file descriptor opened",
+        "\tfunc\t to retrieve all the the function of the file to analyse");
 }
 
 void kill_child_process(const pid_t child)
@@ -509,9 +519,9 @@ int start_UI(const pid_t child, const char *filename)
 {
     int run = 1;
     char input[20];
-    const char *options[13] = {"help", "exit", "run", "signal", "PID",
+    const char *options[14] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
-                               "meta", "lib", "fd"};
+                               "meta", "lib", "fd", "func"};
 
     while(run)
     {
@@ -549,7 +559,7 @@ int start_UI(const pid_t child, const char *filename)
             print_pwd(filename);
         // FILE
         else if(strcmp(input, options[9]) == 0)
-            get_source_file(filename);
+            parse_symtab(filename, STT_FILE);
         // META
         else if(strcmp(input, options[10]) == 0)
             print_metadata(filename);
@@ -559,6 +569,9 @@ int start_UI(const pid_t child, const char *filename)
         // FD
         else if(strcmp(input, options[12]) == 0)
             print_file_descr(child);
+        // FUNC
+        else if(strcmp(input, options[13]) == 0)
+            parse_symtab(filename, STT_FUNC);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }
