@@ -8,10 +8,12 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 
 ## Fonctionalités
 
+### Commandes de base
 * `help`: pour afficher la liste des commandes disponibles.
 * `exit`: pour quitter l'application.
 * `run` : pour lancer l'execution du programme.
-* `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
+
+### Environnement du programme
 * `PID`: pour avoir le ProcessusID du programme analysé.
 * `PPID`: pour avoir le ProcessusID de l'applications (programme qui analyse).
 * `GID` : pour avoir le GroupID du programme analysé.
@@ -19,8 +21,11 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `pwd` : pour avoir le chemin absolu dans la machine (si possible) du programme analysé.
 * `file`: pour avoir le nom du fichier source du programme analysé.
 * `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates).
+
+### Deboggage
 * `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées.
 * `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé.
+* `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
 * `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations et compilation__).
 * `syscall`: pour afficher l'appel système en cours.
