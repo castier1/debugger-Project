@@ -16,13 +16,16 @@ int run_prog(char * const* argv);
 char *syscall_name(long long int id);
 
 // Print the syscall and and print it's description
-void print_syscall(const pid_t child, int status);
+void print_syscall(const pid_t child, int status, int check_status);
 
 // Jump to the next syscall
-void jump_syscall(const pid_t child, int status);
+int jump_syscall(const pid_t child, int status, int check_status);
+
+// Run the program and print all it's execution
+void print_all_syscall(const pid_t child, int status);
 
 // Print the result of all or a part of the objump command
-void print_dump(const char *filename, const char *input)
+void print_dump(const char *filename, const char *input);
 
 // Print the name of all the file descriptor opened
 void print_file_descr(const pid_t child);

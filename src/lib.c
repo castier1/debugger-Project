@@ -136,41 +136,67 @@ char *syscall_name(long long int id)
 int in_syscall = 0;
 int counter = 0;
 
-void check_syscall(const pid_t child, int status)
+void print_syscall(const pid_t child, int status, int check_status)
 {
-    if(WIFEXITED(status)){
+    if(check_status && WIFEXITED(status)){
         printf("\tChild process stopped.\n");
         return;
     }
 
     struct user_regs_struct regs;
-    ptrace(PTRACE_GETREGS, child, NULL, &regs);
+    if(ptrace(PTRACE_GETREGS, child, NULL, &regs) == -1)
+        perror("\tERROR : print_syscall : PTRACE_GETREGS");
 
     if(!in_syscall){
         char *str = syscall_name(regs.orig_rax);
         if(str)
             printf("\tSystem Call : %s (rbx:%lld, rcx:%lld, rdx:%lld)\n",
                     str, regs.rbx, regs.rcx, regs.rdx);
-        else
-            printf("\tSystemCall %lld (rbx:%lld, rcx:%lld, rdx:%lld)\n",
-                    regs.orig_rax, regs.rbx, regs.rcx, regs.rdx);
         in_syscall = 1;
         counter++;
     }
 }
 
-void jump_syscall(const pid_t child, int status)
+int jump_syscall(const pid_t child, int status, int check_status)
 {
-    if(WIFEXITED(status)){
+    if(check_status && WIFEXITED(status)){
         printf("\tChild process stopped.\n");
-        return;
+        return -1;
     }
 
-    ptrace(PTRACE_SYSCALL, child, NULL, NULL);
+    if(ptrace(PTRACE_SYSCALL, child, NULL, NULL) == -1)
+        perror("\tERROR : jump_syscall : PTRACE_SYSCALL");
+
     waitpid(child, &status, 0);
     in_syscall = 0;
 
-    printf("\tjump to the next syscall or instruction.\n\t(call 'syscall' for more information)\n");
+    if(check_status)
+        printf("\tjump to the next syscall or instruction.\n\t(call 'syscall' for more information)\n");
+    return status;
+}
+
+void print_all_syscall(const pid_t child, int status)
+{
+    int check_status = 0;
+    siginfo_t sig;
+
+    while(!WIFEXITED(status))
+    {
+        // Find and print syscall
+        print_syscall(child, status, check_status);
+        //Jump to the next syscall
+        status = jump_syscall(child, status, check_status);
+
+        // Check signal
+        if(ptrace(PTRACE_GETSIGINFO, child, NULL, &sig) == -1)
+            perror("\tERROR : print_all_syscall : PTRACE_GETSIGINFO");
+        // If signo != 0, detection of an error and stop the process
+        if(sig.si_signo != SIGTRAP){
+            printf("\t%s %d %d\n", strsignal(sig.si_signo), sig.si_signo, sig.si_code);
+            break;
+        }
+    }
+    printf("\tChild process stopped.\n");
 }
 
 void print_dump(const char *filename, const char *input)
@@ -640,14 +666,14 @@ void helpMsg()
         PGID\t to print the Parent GID\n\
         pwd\t to print the absolute path of the program to analyse\n\
         file\t to print the name of the source code file\n\
-        meta\t to print all the metadata of the file to analyse\n\
-        \t  (file type, mode, owner, file size, times)\n\
+        meta\t to print all the metadata of the file to analyse (type, mode, owner, size, time)\n\
         lib\t to print the list of all the dynamic librairies loaded\n\
         fd\t to print all the file descriptor opened\n\
         func\t to retrieve all the the function of the file to analyse\n\
         dump [<func>]\t to dump all the program or just a given function (need objdump)\n\
-        syscall\t to check if there is a syscall at the time\n\
-        next\t to jump (= run the program) to the next syscall instruction\n");
+        syscall [all]\t to check if there is a syscall at the time\n\
+        \t\t (if 'all' option, then run and print all the syscall of the program)\n\
+        next\t to jump to the next syscall instruction\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -677,7 +703,7 @@ void resume(const pid_t child)
 int start_UI(const pid_t child, int stat, const char *filename)
 {
     int status = stat;
-    int run = 1;
+    int run = 1, check_status = 1;
     char input[20], args[20];
     const char *options[17] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
@@ -696,7 +722,8 @@ int start_UI(const pid_t child, int stat, const char *filename)
         if(strcmp(input, options[0]) == 0)
             helpMsg();
         // EXIT
-        else if(strcmp(input, options[1]) == 0){
+        else if(strcmp(input, options[1]) == 0)
+        {
             run = 0;
             kill_child_process(child);
         }
@@ -737,19 +764,25 @@ int start_UI(const pid_t child, int stat, const char *filename)
         else if(strcmp(input, options[13]) == 0)
             parse_symtab(filename, STT_FUNC);
         // DUMP
-        else if(strcmp(input, options[14]) == 0){
+        else if(strcmp(input, options[14]) == 0)
+        {
             print_dump(filename, args);
             args[0] = '\0';
         }
         // SYSCALL
-        else if(strcmp(input, options[15]) == 0){
-            check_syscall(child, status);
+        else if(strcmp(input, options[15]) == 0)
+        {
+            if(strcmp(args, "all") == 0) {
+                print_all_syscall(child, status);
+                args[0] = '\0';
+            }
+            else
+                print_syscall(child, status, check_status);
             printf("\tTotal count of syscall = %d\n", counter);
         }
         // NEXT
-        else if(strcmp(input, options[16]) == 0){
-            jump_syscall(child, status);
-        }
+        else if(strcmp(input, options[16]) == 0)
+            jump_syscall(child, status, check_status);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }

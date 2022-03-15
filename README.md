@@ -62,14 +62,14 @@ analyze >>> help
 	PGID    to print the Parent GID
 	pwd     to print the absolute path of the program to analyse
 	file    to print the name of the source code file
-	meta    to print all the metadata of the file to analyse
-	         (file type, mode, owner, file size, times)
+	meta    to print all the metadata of the file to analyse (type, mode, owner, size, time)
 	file    to print the list of all the dynamic librairies loaded
 	fd      to print all the file descriptor opened
 	func    to print all the function of the program to analyse
 	dump [<func>]    to dump all the program or just a given function (need objdump)
-	syscall to check if there is a syscall at the time
-    next    to jump (= run the program) to the next syscall instruction
+	syscall [all]    to check if there is a syscall at the time
+                        (if 'all' option, then run and print all the syscall of the program)
+	next    to jump to the next syscall instruction
 analyse >>> PID
 	 71776
 analyse >>> PPID
