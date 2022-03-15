@@ -28,7 +28,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
 * `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations et compilation__).
-* `syscall [all]`: pour afficher l'appel système en cours.
+* `syscall [all]`: pour afficher un seul (en cours) ou tous les appels systèmes du programme.
 * `next`: pour pouvoir continuer l'execution jusqu'au prochain appel système.
 
 ## Utilisation
