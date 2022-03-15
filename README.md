@@ -22,10 +22,14 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées
 * `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
+* `dump`: pour afficher l'ensemble ou une partie du binaire désassemblé (voir partie __Installations et compilation__).
 
 ## Utilisation
 
-### Installation et compilation
+### Installations et compilation
+
+Pour pouvoir utiliser correctement l'ensemble des fonctionnalités, il faut vérifier que les packages suivants sont bien installé sur la machine utilisée:
+* binutils: pour pouvoir utiliser la commande `dump` (qui appelle `objdump`).
 
 Pour lancer la compilation et la création de l'executable, il suffit de lancer la commande `make` dans un terminal.
 
@@ -41,7 +45,7 @@ Si le programme a besoin d'arguments, lancer la commande:
 
 ### Commandes
 
-La communication avec l'analyseur se fait via l'ensemble des commandes présentées dans la partie Fonctionalités.
+La communication avec l'analyseur se fait via l'ensemble des commandes présentées dans la partie __Fonctionalités__.
 
 Par exemple:
 ```
@@ -61,6 +65,7 @@ analyze >>> help
 	file    to print the list of all the dynamic librairies loaded
 	fd      to print all the file descriptor opened
 	func    to print all the function of the program to analyse
+	dump [<func>]    to dump all the program or just a given function (need objdump)
 analyse >>> PID
 	 71776
 analyse >>> PPID

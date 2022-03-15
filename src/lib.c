@@ -22,7 +22,7 @@ void exec_prog(char * const *argv)
 {
     // argv = path_to_file, argument1, argument2, ..., NULL
     if (execv(argv[0], argv) == -1)
-        perror("\tERROR: exec_prog: ptrace");
+        perror("\tERROR: exec_prog: execv");
 }
 
 int run_prog(char * const* argv)
@@ -33,6 +33,25 @@ int run_prog(char * const* argv)
 
     exec_prog(argv);
     return 0;
+}
+
+void print_dump(const char *filename, const char *input)
+{
+    char *str;
+
+    if(strlen(input)) {
+        str = malloc(sizeof(*str) * (strlen(input) + 36));
+        sprintf(str, "objdump -d %s | sed '/<%s>:/,/^$/!d'", filename, input);
+    }
+    else {
+        str = malloc(sizeof(*str) * (strlen(input) + 12));
+        sprintf(str, "objdump -d %s", filename);
+    }
+
+    if(system(str) < 0)
+        printf("\tERROR: print_dump: system ('%s', '%s')", filename, input);
+
+    free(str);
 }
 
 void print_file_descr(const pid_t child)
@@ -473,22 +492,22 @@ void getsignal(const pid_t child)
 
 void helpMsg()
 {
-    printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-        "\thelp\t to show this message",
-        "\texit\t to quit this interface",
-        "\trun\t to run the program",
-        "\tsignal\t to print the last signal received",
-        "\tPID\t to print the PID",
-        "\tPPID\t to print the Parent PID",
-        "\tGID\t to print the GID",
-        "\tPGID\t to print the Parent GID",
-        "\tpwd\t to print the absolute path of the program to analyse",
-        "\tfile\t to print the name of the source code file",
-        "\tmeta\t to print all the metadata of the file to analyse\
-           \n\t\t  (file type, mode, owner, file size, times)",
-        "\tlib\t to print the list of all the dynamic librairies loaded",
-        "\tfd\t to print all the file descriptor opened",
-        "\tfunc\t to retrieve all the the function of the file to analyse");
+    printf("\thelp\t to show this message\n\
+        exit\t to quit this interface\n\
+        run\t to run the program\n\
+        signal\t to print the last signal received\n\
+        PID\t to print the PID\n\
+        PPID\t to print the Parent PID\n\
+        GID\t to print the GID\n\
+        PGID\t to print the Parent GID\n\
+        pwd\t to print the absolute path of the program to analyse\n\
+        file\t to print the name of the source code file\n\
+        meta\t to print all the metadata of the file to analyse\n\
+        \t  (file type, mode, owner, file size, times)\n\
+        lib\t to print the list of all the dynamic librairies loaded\n\
+        fd\t to print all the file descriptor opened\n\
+        func\t to retrieve all the the function of the file to analyse\n\
+        dump [<func>]\t to dump all the program or just a given function (need objdump)\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -518,15 +537,18 @@ void resume(const pid_t child)
 int start_UI(const pid_t child, const char *filename)
 {
     int run = 1;
-    char input[20];
-    const char *options[14] = {"help", "exit", "run", "signal", "PID",
+    char input[20], args[20];
+    const char *options[15] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
-                               "meta", "lib", "fd", "func"};
+                               "meta", "lib", "fd", "func", "dump"};
 
     while(run)
     {
         printf("analyse >>> ");
-        scanf("%s", input);
+
+        char buffer[50];
+        fgets(buffer, 50, stdin);
+        sscanf(buffer, "%s %s", input, args);
 
         // HELP
         if(strcmp(input, options[0]) == 0)
@@ -572,6 +594,11 @@ int start_UI(const pid_t child, const char *filename)
         // FUNC
         else if(strcmp(input, options[13]) == 0)
             parse_symtab(filename, STT_FUNC);
+        // DUMP
+        else if(strcmp(input, options[14]) == 0){
+            print_dump(filename, args);
+            args[0] = '\0';
+        }
         else
             printf("\t\"%s\" : unknown command\n", input);
     }
