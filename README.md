@@ -11,18 +11,20 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `help`: pour afficher la liste des commandes disponibles.
 * `exit`: pour quitter l'application.
 * `run` : pour lancer l'execution du programme.
-* `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.)
+* `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
 * `PID`: pour avoir le ProcessusID du programme analysé.
 * `PPID`: pour avoir le ProcessusID de l'applications (programme qui analyse).
 * `GID` : pour avoir le GroupID du programme analysé.
 * `PGID`: pour avoir le GroupID de l'applications (programme qui analyse).
 * `pwd` : pour avoir le chemin absolu dans la machine (si possible) du programme analysé.
 * `file`: pour avoir le nom du fichier source du programme analysé.
-* `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates)
-* `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées
-* `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé
+* `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates).
+* `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées.
+* `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé.
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
-* `dump`: pour afficher l'ensemble ou une partie du binaire désassemblé (voir partie __Installations et compilation__).
+* `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations et compilation__).
+* `syscall`: pour afficher l'appel système en cours.
+* `next`: pour pouvoir continuer l'execution jusqu'au prochain appel système.
 
 ## Utilisation
 
@@ -66,6 +68,8 @@ analyze >>> help
 	fd      to print all the file descriptor opened
 	func    to print all the function of the program to analyse
 	dump [<func>]    to dump all the program or just a given function (need objdump)
+	syscall to check if there is a syscall at the time
+    next    to jump (= run the program) to the next syscall instruction
 analyse >>> PID
 	 71776
 analyse >>> PPID

@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 		if(waitpid(child, &status, 0) == -1)
 			return printf("ERROR : main : waitpid\n"), 1;
 		// Start the communication with user
-		if(start_UI(child, argv[0]) == -1)
+		if(start_UI(child, status, argv[0]) == -1)
 			return printf("ERROR : main : start_UI\n"), 1;
 	}
 
