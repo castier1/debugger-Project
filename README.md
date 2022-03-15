@@ -33,16 +33,15 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 
 ## Utilisation
 
-### Installations et compilation
+### Installations
 
 Pour pouvoir utiliser correctement l'ensemble des fonctionnalités, il faut vérifier que les packages suivants sont bien installé sur la machine utilisée:
 * binutils: pour pouvoir utiliser la commande `dump` (qui appelle `objdump`).
 
-Pour lancer la compilation et la création de l'executable, il suffit de lancer la commande `make` dans un terminal.
-
 ### Lancement
 
-Pour pouvoir analyser un programme exterieur, lancer la commande:
+Pour lancer la compilation et la création de l'executable, il suffit de lancer la commande `make` dans un terminal.
+Puis, pour pouvoir analyser un programme exterieur, lancer la commande:
 
 `./analyzer <path-to-file>`
 
@@ -94,7 +93,7 @@ La suite de commandes:
 1. `make good`
 2. `./analyzer bin/good`
 
-permettent de tester le binaire créé d'après le programme `good.c`dans `src/`. Celui-ci est un programme simple ne générant pas d'erreur.
+permet de tester le binaire créé d'après le programme `good.c`dans `src/`. Celui-ci est un programme simple ne générant pas d'erreur.
 
 ### bad
 La suite de commandes:
@@ -102,6 +101,6 @@ La suite de commandes:
 1. `make bad`
 2. `./analyzer bin/bad`
 
-permettent de tester le binaire créé d'après le programme `bad.c`dans `src/`. Celui-ci est un programme simple générant une erreur de segmentation.
+permet de tester le binaire créé d'après le programme `bad.c`dans `src/`. Celui-ci est un programme simple générant une erreur de segmentation.
 
 ## Autre

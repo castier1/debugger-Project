@@ -4,6 +4,8 @@ CC=gcc
 CFLAGS= -g
 .PHONY: analyzer clean
 
+$(shell mkdir -p bin)
+
 # --- EXECUTIONS --- #
 
 run: bad good
@@ -32,4 +34,4 @@ bin/lib: src/lib.c
 # --- CLEANNING --- #
 
 clean:
-	rm -f bin/*.o bin/bad bin/good bin/lib analyzer
+	rm -rf bin analyzer
