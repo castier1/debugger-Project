@@ -4,15 +4,15 @@
 void sigsegv_function(int a)
 {
 	// Create a Segmentation fault
-	int * p = NULL;
-	*p = a;
+	int * variable_func = NULL;
+	*variable_func = a;
 }
 
 int main(int argc, char const *argv[])
 {
-	int var = 12;
+	int variable_main = 12;
 
-	sigsegv_function(var);
+	sigsegv_function(variable_main);
 
 	return 0;
 }
