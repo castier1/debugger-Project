@@ -28,7 +28,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
 * `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations et compilation__).
-* `syscall`: pour afficher l'appel système en cours.
+* `syscall [all]`: pour afficher l'appel système en cours.
 * `next`: pour pouvoir continuer l'execution jusqu'au prochain appel système.
 
 ## Utilisation
@@ -41,6 +41,7 @@ Pour pouvoir utiliser correctement l'ensemble des fonctionnalités, il faut vér
 ### Lancement
 
 Pour lancer la compilation et la création de l'executable, il suffit de lancer la commande `make` dans un terminal.
+
 Puis, pour pouvoir analyser un programme exterieur, lancer la commande:
 
 `./analyzer <path-to-file>`
@@ -84,7 +85,7 @@ analyse >>> exit
 
 ### Nettoyage
 
-La commande `make clean` permettera de nettoyer le dossier `bin/` et de supprimer l'executable `analyzer`.
+La commande `make clean` permet de nettoyer le dossier `bin/` et de supprimer l'executable `analyzer`.
 
 ## Exemples
 ### good
