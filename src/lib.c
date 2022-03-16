@@ -138,15 +138,18 @@ int counter = 0;
 
 void print_syscall(const pid_t child, int status, int check_status)
 {
+    // Check if the process is already stopped
     if(check_status && WIFEXITED(status)){
         printf("\tChild process stopped.\n");
         return;
     }
 
+    // Catch and stock the register data
     struct user_regs_struct regs;
     if(ptrace(PTRACE_GETREGS, child, NULL, &regs) == -1)
         perror("\tERROR : print_syscall : PTRACE_GETREGS");
 
+    // If just before a syscall, print it's name and description
     if(!in_syscall){
         char *str = syscall_name(regs.orig_rax);
         if(str)
@@ -159,14 +162,17 @@ void print_syscall(const pid_t child, int status, int check_status)
 
 int jump_syscall(const pid_t child, int status, int check_status)
 {
+    // Check if the process is already stopped
     if(check_status && WIFEXITED(status)){
         printf("\tChild process stopped.\n");
         return -1;
     }
 
+    // Jump to the next syscall
     if(ptrace(PTRACE_SYSCALL, child, NULL, NULL) == -1)
         perror("\tERROR : jump_syscall : PTRACE_SYSCALL");
 
+    // Wait the end of the execution
     waitpid(child, &status, 0);
     in_syscall = 0;
 
@@ -177,9 +183,11 @@ int jump_syscall(const pid_t child, int status, int check_status)
 
 void print_all_syscall(const pid_t child, int status)
 {
+    // Disable some comments
     int check_status = 0;
     siginfo_t sig;
 
+    // While the program is running
     while(!WIFEXITED(status))
     {
         // Find and print syscall
@@ -203,10 +211,12 @@ void print_dump(const char *filename, const char *input)
 {
     char *str;
 
+    // If there is a function name as an option, dump just this function
     if(strlen(input)) {
         str = malloc(sizeof(*str) * (strlen(input) + 36));
         sprintf(str, "objdump -d %s | sed '/<%s>:/,/^$/!d'", filename, input);
     }
+    // If no options, dump all the binary
     else {
         str = malloc(sizeof(*str) * (strlen(input) + 12));
         sprintf(str, "objdump -d %s", filename);
@@ -228,29 +238,30 @@ void print_file_descr(const pid_t child)
     if(!dir)
         perror("\tERROR : print_open_files : opendir");
 
+    // Parse all the entries in the directory
     struct dirent * entry = NULL;
     while((entry = readdir(dir)) != NULL)
     {
-        //printf("%s of type %s\n", entry->d_name, file_type(entry->d_type));
+        // If entry is a symbolic link
         if(entry->d_type == DT_LNK)
         {
+            // Retrieve it's name
             char filename[512], linkname[512];
             sprintf(filename, "/proc/%d/fd/%s", child, entry->d_name);
 
+            // Retrieve it's size
             struct stat stat;
             if((lstat(filename, &stat)) == -1)
                 perror("\tERROR : print_open_files : lstat");
 
+            // Retrieve the file source
             if((readlink(filename, linkname, stat.st_size + 1)) == -1)
                 perror("\tERROR : print_open_files : readlink");
 
-            //linkname[49] = '\0';
             printf("\t%s\n", linkname);
-
         }
     }
     closedir(dir);
-
 }
 
 void print_lib(const pid_t child)
@@ -421,7 +432,9 @@ void parse_symtab(const char *filename, unsigned char TYPE)
         // Stock only the datas in the table of symbols
         if (sections[i].sh_type == SHT_SYMTAB)
         {
+            // Stock the names
             symtab = (Elf64_Sym*)((char*)start + sections[i].sh_offset);
+            // Stock the number of symbols found
             nb_symbols = sections[i].sh_size / sections[i].sh_entsize;
 
             strtab = (char*)((char*)start + sections[sections[i].sh_link].sh_offset);
@@ -457,7 +470,10 @@ void parse_symtab(const char *filename, unsigned char TYPE)
 
 void print_pwd(const char *filename)
 {
+    // Retrieve the absolute path
     char* path = realpath(filename, NULL);
+
+    // Check errors and print it
     if(!path)
         perror("\tERROR : print_pwd : realpath");
     else {
@@ -772,10 +788,12 @@ int start_UI(const pid_t child, int stat, const char *filename)
         // SYSCALL
         else if(strcmp(input, options[15]) == 0)
         {
+            // If there is the 'all' option
             if(strcmp(args, "all") == 0) {
                 print_all_syscall(child, status);
                 args[0] = '\0';
             }
+            // If no option
             else
                 print_syscall(child, status, check_status);
             printf("\tTotal count of syscall = %d\n", counter);
