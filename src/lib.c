@@ -374,6 +374,23 @@ void print_metadata(const char *filename)
     printf("\tlast file modification : %s", ctime(&stat.st_mtime));
 }
 
+void print_function_infos(const char *filename, const size_t addr)
+{
+    char *str;
+    // 23 = strlen("addr2line -pe %s -f %lx")
+    // 16 = strlen(addr)
+    str = malloc(sizeof(*str) * (strlen(filename) + 23 + 16));
+    if(!str)
+        perror("ERROR : print_function_infos: malloc");
+
+    sprintf(str, "addr2line -pe %s -f %lx", filename, addr);
+
+    if(system(str) < 0)
+        printf("\tERROR: print_function_infos: system ('%s', '%lx')", filename, addr);
+
+    free(str);
+}
+
 void *open_elf(const char *filename)
 {
     void *start = NULL;
@@ -408,7 +425,7 @@ void *open_elf(const char *filename)
     return start;
 }
 
-void parse_symtab(const char *filename, unsigned char TYPE)
+void parse_symtab(const char *filename, const unsigned char TYPE, const char *func_name)
 {
     const char *to_ignore[2] = {"", "crtstuff.c"};
     char *strtab;
@@ -462,7 +479,13 @@ void parse_symtab(const char *filename, unsigned char TYPE)
             {
                 // If it's type is "FUNC", check it and print it
                 if(symtab[i].st_info == STT_FUNC || symtab[i].st_info == 18)
-                    printf("\t%s\n", strtab + symtab[i].st_name);
+                {
+                    char *tmp = strtab + symtab[i].st_name;
+                    if(!func_name)
+                        printf("\t%s\n", strtab + symtab[i].st_name);
+                    else if(strcmp(func_name, tmp) == 0)
+                        print_function_infos(filename, symtab[i].st_value);
+                }
             }
             break;
     }
@@ -689,7 +712,8 @@ void helpMsg()
         dump [<func>]\t to dump all the program or just a given function (need objdump)\n\
         syscall [all]\t to check if there is a syscall at the time\n\
         \t\t (if 'all' option, then run and print all the syscall of the program)\n\
-        next\t to jump to the next syscall instruction\n");
+        next\t to jump to the next syscall instruction\n\
+        locate <func>\t to print the location (file and line) of a given function (need addr2line)\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -721,10 +745,10 @@ int start_UI(const pid_t child, int stat, const char *filename)
     int status = stat;
     int run = 1, check_status = 1;
     char input[20], args[20];
-    const char *options[17] = {"help", "exit", "run", "signal", "PID",
+    const char *options[18] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
                                "meta", "lib", "fd", "func", "dump",
-                               "syscall", "next"};
+                               "syscall", "next", "locate"};
 
     while(run)
     {
@@ -766,7 +790,7 @@ int start_UI(const pid_t child, int stat, const char *filename)
             print_pwd(filename);
         // FILE
         else if(strcmp(input, options[9]) == 0)
-            parse_symtab(filename, STT_FILE);
+            parse_symtab(filename, STT_FILE, NULL);
         // META
         else if(strcmp(input, options[10]) == 0)
             print_metadata(filename);
@@ -778,7 +802,7 @@ int start_UI(const pid_t child, int stat, const char *filename)
             print_file_descr(child);
         // FUNC
         else if(strcmp(input, options[13]) == 0)
-            parse_symtab(filename, STT_FUNC);
+            parse_symtab(filename, STT_FUNC, NULL);
         // DUMP
         else if(strcmp(input, options[14]) == 0)
         {
@@ -801,6 +825,19 @@ int start_UI(const pid_t child, int stat, const char *filename)
         // NEXT
         else if(strcmp(input, options[16]) == 0)
             jump_syscall(child, status, check_status);
+        // LOCATE
+        else if(strcmp(input, options[17]) == 0)
+        {
+            // If no argument
+            if(strcmp(args, "") == 0)
+                printf("\tUSAGE : locate <function>\n\
+            Use the 'func' command to list all the possible function.\n");
+            // If there is an argument
+            else {
+                parse_symtab(filename, STT_FUNC, args);
+                args[0] = '\0';
+            }
+        }
         else
             printf("\t\"%s\" : unknown command\n", input);
     }

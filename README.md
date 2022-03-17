@@ -27,7 +27,8 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé.
 * `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
-* `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations et compilation__).
+* `locate <function>`: pour afficher (si possible) la localisation (fichier source et ligne) d'une fonction utilisée dans le programme analysé (voir partie __Installations__).
+* `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations__).
 * `syscall [all]`: pour afficher un seul (en cours) ou tous les appels systèmes du programme.
 * `next`: pour pouvoir continuer l'execution jusqu'au prochain appel système.
 
@@ -36,7 +37,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 ### Installations
 
 Pour pouvoir utiliser correctement l'ensemble des fonctionnalités, il faut vérifier que les packages suivants sont bien installé sur la machine utilisée:
-* binutils: pour pouvoir utiliser la commande `dump` (qui appelle `objdump`).
+* binutils: pour pouvoir utiliser les commandes `dump` (qui appelle `objdump`) et `locate` (qui appelle `addr2line`).
 
 ### Lancement
 
@@ -75,6 +76,7 @@ analyze >>> help
 	syscall [all]    to check if there is a syscall at the time
                         (if 'all' option, then run and print all the syscall of the program)
 	next    to jump to the next syscall instruction
+	locate <func>    to print the location (file and line) of a given function (need addr2line)
 analyse >>> PID
 	 71776
 analyse >>> PPID

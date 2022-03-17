@@ -45,11 +45,14 @@ void print_owner(uid_t uid);
 // Print the common metadata
 void print_metadata(const char *filename);
 
+// Print the result of the addr2line command
+void print_function_infos(const char *filename, const size_t addr);
+
 // Check and open an elf file
 void *open_elf(const char *filename);
 
 // Parse an elf file and retrieve data: source file name or functions name
-void parse_symtab(const char *filename, unsigned char TYPE);
+void parse_symtab(const char *filename, const unsigned char TYPE, const char *func_name);
 
 // [NOT-USED-YET] Print the current location of this funcion
 void where_am_i(const char *file, const char *function, const int line);
