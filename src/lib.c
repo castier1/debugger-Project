@@ -37,6 +37,16 @@ int run_prog(char * const* argv)
     return 0;
 }
 
+void print_stack(pid_t child)
+{
+    // Retrieve the cmd
+    char cmd[30];
+    sprintf(cmd, "sudo cat /proc/%d/stack", child);
+
+    // Execute with sudo rights
+    system(cmd);
+}
+
 char *syscall_name(long long int id)
 {
     switch(id){
@@ -152,9 +162,11 @@ void print_syscall(const pid_t child, int status, int check_status)
     // If just before a syscall, print it's name and description
     if(!in_syscall){
         char *str = syscall_name(regs.orig_rax);
-        if(str)
-            printf("\tSystem Call : %s (rbx:%lld, rcx:%lld, rdx:%lld)\n",
-                    str, regs.rbx, regs.rcx, regs.rdx);
+        if(str){
+            printf("\t%s (%ld, %ld, %ld, %ld, %ld, %ld)\n",
+                    str, (long)regs.rdi, (long)regs.rsi, (long)regs.rdx,
+                         (long)regs.r10, (long)regs.r8,  (long)regs.r9);
+        }
         in_syscall = 1;
         counter++;
     }
@@ -713,7 +725,8 @@ void helpMsg()
         syscall [all]\t to check if there is a syscall at the time\n\
         \t\t (if 'all' option, then run and print all the syscall of the program)\n\
         next\t to jump to the next syscall instruction\n\
-        locate <func>\t to print the location (file and line) of a given function (need addr2line)\n");
+        locate <func>\t to print the location (file and line) of a given function (need addr2line)\n\
+        stack\t to print the state of the program-to-analyse's stack\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -745,10 +758,10 @@ int start_UI(const pid_t child, int stat, const char *filename)
     int status = stat;
     int run = 1, check_status = 1;
     char input[20], args[20];
-    const char *options[18] = {"help", "exit", "run", "signal", "PID",
+    const char *options[19] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
                                "meta", "lib", "fd", "func", "dump",
-                               "syscall", "next", "locate"};
+                               "syscall", "next", "locate", "stack"};
 
     while(run)
     {
@@ -838,6 +851,8 @@ int start_UI(const pid_t child, int stat, const char *filename)
                 args[0] = '\0';
             }
         }
+        else if(strcmp(input, options[18]) == 0)
+            print_stack(child);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }

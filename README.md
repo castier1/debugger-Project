@@ -31,6 +31,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations__).
 * `syscall [all]`: pour afficher un seul (en cours) ou tous les appels systèmes du programme.
 * `next`: pour pouvoir continuer l'execution jusqu'au prochain appel système.
+* `stack`: pour avoir l'état de la pile d'appel d'un processus. Affiche le contenu du fichier `/proc/[pid]/stack`. (Demande les droits sudo.)
 
 ## Utilisation
 
@@ -77,6 +78,7 @@ analyze >>> help
                         (if 'all' option, then run and print all the syscall of the program)
 	next    to jump to the next syscall instruction
 	locate <func>    to print the location (file and line) of a given function (need addr2line)
+	stack   to print the state of the program-to-analyse's stack
 analyse >>> PID
 	 71776
 analyse >>> PPID

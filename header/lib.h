@@ -12,6 +12,9 @@ int run_prog(char * const* argv);
 
 /* ------- PARENT PROCESS ------- */
 
+// Print the stack list of a pid
+void print_stack(pid_t child);
+
 // Get the syscall name
 char *syscall_name(long long int id);
 
