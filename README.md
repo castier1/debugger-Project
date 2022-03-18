@@ -26,6 +26,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 * `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées.
 * `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé.
 * `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
+* `gvar`: pour avoir la liste de toutes les variables globales utilisées (nom et taille).
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
 * `locate <function>`: pour afficher (si possible) la localisation (fichier source et ligne) d'une fonction utilisée dans le programme analysé (voir partie __Installations__).
 * `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations__).
@@ -79,6 +80,7 @@ analyze >>> help
 	next    to jump to the next syscall instruction
 	locate <func>    to print the location (file and line) of a given function (need addr2line)
 	stack   to print the state of the program-to-analyse's stack
+	gvar    to print all the global data in the program
 analyse >>> PID
 	 71776
 analyse >>> PPID

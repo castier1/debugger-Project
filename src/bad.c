@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static const int variable_globale = 100;
+
 void sigsegv_function(int a)
 {
 	// Create a Segmentation fault

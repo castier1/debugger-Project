@@ -500,6 +500,18 @@ void parse_symtab(const char *filename, const unsigned char TYPE, const char *fu
                 }
             }
             break;
+        case STT_OBJECT:
+            // Parse all the symbols stocked
+            for (int i = 0; i < nb_symbols; ++i)
+            {
+                // If it's type is "FUNC", check it and print it
+                if(symtab[i].st_info == STT_OBJECT && symtab[i].st_size > 0)
+                {
+                    char *tmp = strtab + symtab[i].st_name;
+                    printf("\t%s (size = %ld)\n", tmp, symtab[i].st_size);
+                }
+            }
+            break;
     }
 }
 
@@ -726,7 +738,8 @@ void helpMsg()
         \t\t (if 'all' option, then run and print all the syscall of the program)\n\
         next\t to jump to the next syscall instruction\n\
         locate <func>\t to print the location (file and line) of a given function (need addr2line)\n\
-        stack\t to print the state of the program-to-analyse's stack\n");
+        stack\t to print the state of the program-to-analyse's stack\n\
+        gvar\t to print all the global data in the program\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -758,10 +771,11 @@ int start_UI(const pid_t child, int stat, const char *filename)
     int status = stat;
     int run = 1, check_status = 1;
     char input[20], args[20];
-    const char *options[19] = {"help", "exit", "run", "signal", "PID",
+    const char *options[20] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
                                "meta", "lib", "fd", "func", "dump",
-                               "syscall", "next", "locate", "stack"};
+                               "syscall", "next", "locate", "stack",
+                               "gvar"};
 
     while(run)
     {
@@ -851,8 +865,12 @@ int start_UI(const pid_t child, int stat, const char *filename)
                 args[0] = '\0';
             }
         }
+        // STACK
         else if(strcmp(input, options[18]) == 0)
             print_stack(child);
+        // GLOBAL VARIABLE
+        else if(strcmp(input, options[19]) == 0)
+            parse_symtab(filename, STT_OBJECT, NULL);
         else
             printf("\t\"%s\" : unknown command\n", input);
     }
