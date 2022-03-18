@@ -37,7 +37,7 @@ Pour cela, le programme principale communique avec l'utilisateur via différente
 ### Installations
 
 Pour pouvoir utiliser correctement l'ensemble des fonctionnalités, il faut vérifier que les packages suivants sont bien installé sur la machine utilisée:
-* binutils: pour pouvoir utiliser les commandes `dump` (qui appelle `objdump`) et `locate` (qui appelle `addr2line`).
+* [binutils](https://www.gnu.org/software/binutils/): pour pouvoir utiliser les commandes `dump` (qui appelle [objdump](https://linux.die.net/man/1/objdump "man objdump")) et `locate` (qui appelle [addr2line](https://linux.die.net/man/1/addr2line "man addr2line")).
 
 ### Lancement
 
