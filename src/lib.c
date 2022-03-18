@@ -738,7 +738,7 @@ void helpMsg()
         \t\t (if 'all' option, then run and print all the syscall of the program)\n\
         next\t to jump to the next syscall instruction\n\
         locate <func>\t to print the location (file and line) of a given function (need addr2line)\n\
-        stack\t to print the state of the program-to-analyse's stack\n\
+        stack\t to print the state of the program-to-analyse's stack (need sudo rights)\n\
         gvar\t to print all the global data in the program\n");
 }
 

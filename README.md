@@ -79,7 +79,7 @@ analyze >>> help
                         (if 'all' option, then run and print all the syscall of the program)
 	next    to jump to the next syscall instruction
 	locate <func>    to print the location (file and line) of a given function (need addr2line)
-	stack   to print the state of the program-to-analyse's stack
+	stack   to print the state of the program-to-analyse's stack (need sudo rights)
 	gvar    to print all the global data in the program
 analyse >>> PID
 	 71776
