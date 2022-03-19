@@ -490,11 +490,12 @@ void parse_symtab(const char *filename, const unsigned char TYPE, const char *fu
             for (int i = 0; i < nb_symbols; ++i)
             {
                 // If it's type is "FUNC", check it and print it
-                if(symtab[i].st_info == STT_FUNC || symtab[i].st_info == 18)
+                if((symtab[i].st_info == STT_FUNC || symtab[i].st_info == 18)
+                    && symtab[i].st_value)
                 {
                     char *tmp = strtab + symtab[i].st_name;
                     if(!func_name)
-                        printf("\t%s\n", strtab + symtab[i].st_name);
+                        printf("\t(0x%lx)\t%s\n", symtab[i].st_value, strtab + symtab[i].st_name);
                     else if(strcmp(func_name, tmp) == 0)
                         print_function_infos(filename, symtab[i].st_value);
                 }
