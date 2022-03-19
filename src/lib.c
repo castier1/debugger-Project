@@ -537,165 +537,157 @@ void where_am_i(const char *file, const char *function, const int line)
 
 char *print_si_code(const int si_signo, const int si_code)
 {
-    char *s = calloc(76, sizeof(*s));
-    int in = 0;
-
     switch(si_signo){
         case SIGILL:
             switch(si_code){
                 case ILL_ILLOPC:
-                    sprintf(s, ": Illegal opcode.(%d)", si_code);
+                    return ": Illegal opcode";
                     break;
                 case ILL_ILLOPN:
-                    sprintf(s, ": Illegal operand.(%d)", si_code);
+                    return ": Illegal operand.";
                     break;
                 case ILL_ILLADR:
-                    sprintf(s, ": Illegal addressing mode.(%d)", si_code);
+                    return ": Illegal addressing mode.";
                     break;
                 case ILL_ILLTRP:
-                    sprintf(s, ": Illegal trap.(%d)", si_code);
+                    return ": Illegal trap.";
                     break;
                 case ILL_PRVOPC:
-                    sprintf(s, ": Privileged opcode.(%d)", si_code);
+                    return ": Privileged opcode.";
                     break;
                 case ILL_PRVREG:
-                    sprintf(s, ": Privileged register.(%d)", si_code);
+                    return ": Privileged register.";
                     break;
                 case ILL_COPROC:
-                    sprintf(s, ": Coprocessor error.(%d)", si_code);
+                    return ": Coprocessor error.";
                     break;
                 case ILL_BADSTK:
-                    sprintf(s, ": Internal stack error.(%d)", si_code);
+                    return ": Internal stack error.";
                     break;
             }
             break;
         case SIGFPE:
             switch(si_code){
                 case FPE_INTDIV:
-                    sprintf(s, ": Integer divide by zero.(%d)", si_code);
+                    return ": Integer divide by zero.";
                     break;
                 case FPE_INTOVF:
-                    sprintf(s, ": Integer overflow.(%d)", si_code);
+                    return ": Integer overflow.";
                     break;
                 case FPE_FLTDIV:
-                    sprintf(s, ": Floating-point divide by zero.(%d)", si_code);
+                    return ": Floating-point divide by zero.";
                     break;
                 case FPE_FLTOVF:
-                    sprintf(s, ": Floating-point overflow.(%d)", si_code);
+                    return ": Floating-point overflow.";
                     break;
                 case FPE_FLTUND:
-                    sprintf(s, ": Floating-point underflow.(%d)", si_code);
+                    return ": Floating-point underflow.";
                     break;
                 case FPE_FLTRES:
-                    sprintf(s, ": Floating-point inexact result.(%d)", si_code);
+                    return ": Floating-point inexact result.";
                     break;
                 case FPE_FLTINV:
-                    sprintf(s, ": Invalid floating-point operation.(%d)", si_code);
+                    return ": Invalid floating-point operation.";
                     break;
                 case FPE_FLTSUB:
-                    sprintf(s, ": Subscript out of range.(%d)", si_code);
+                    return ": Subscript out of range.";
                     break;
             }
             break;
         case SIGSEGV:
             switch(si_code){
                 case SEGV_MAPERR:
-                    sprintf(s, ": Address not mapped to object.(%d)", si_code);
+                    return ": Address not mapped to object.";
                     break;
                 case SEGV_ACCERR:
-                    sprintf(s, ": Invalid permissions for mapped object.(%d)", si_code);
+                    return ": Invalid permissions for mapped object.";
                     break;
             }
             break;
         case SIGBUS:
             switch(si_code){
                 case BUS_ADRALN:
-                    sprintf(s, ": Invalid address alignment.(%d)", si_code);
+                    return ": Invalid address alignment.";
                     break;
                 case BUS_ADRERR:
-                    sprintf(s, ": Nonexistent physical address.(%d)", si_code);
+                    return ": Nonexistent physical address.";
                     break;
                 case BUS_OBJERR:
-                    sprintf(s, ": Object-specific hardware error.(%d)", si_code);
+                    return ": Object-specific hardware error.";
                     break;
             }
             break;
         case SIGTRAP:
-            sprintf(s, ": Process trace trap.(%d)", si_code);
+            return ": Process trace trap.";
             break;
         case SIGCHLD:
             switch(si_code){
                 case CLD_EXITED:
-                    sprintf(s, ": Child has exited.(%d)", si_code);
+                    return ": Child has exited.";
                     break;
                 case CLD_KILLED:
-                    sprintf(s, ": Child has terminated abnormally and did not create a core file.(%d)", si_code);
+                    return ": Child has terminated abnormally and did not create a core file.";
                     break;
                 case CLD_DUMPED:
-                    sprintf(s, ": Child has terminated abnormally and created a core file.(%d)", si_code);
+                    return ": Child has terminated abnormally and created a core file.";
                     break;
                 case CLD_TRAPPED:
-                    sprintf(s, ": Traced child has trapped.(%d)", si_code);
+                    return ": Traced child has trapped.";
                     break;
                 case CLD_STOPPED:
-                    sprintf(s, ": Child has stopped.(%d)", si_code);
+                    return ": Child has stopped.";
                     break;
                 case CLD_CONTINUED:
-                    sprintf(s, ": Stopped child has continued.(%d)", si_code);
+                    return ": Stopped child has continued.";
                     break;
             }
             break;
         case SIGPOLL:
             switch(si_code){
                 case POLL_IN:
-                    sprintf(s, ": Data input available.(%d)", si_code);
+                    return ": Data input available.";
                     break;
                 case POLL_OUT:
-                    sprintf(s, ": Output buffers available.(%d)", si_code);
+                    return ": Output buffers available.";
                     break;
                 case POLL_MSG:
-                    sprintf(s, ": Input message available.(%d)", si_code);
+                    return ": Input message available.";
                     break;
                 case POLL_ERR:
-                    sprintf(s, ": I/O error.(%d)", si_code);
+                    return ": I/O error.";
                     break;
                 case POLL_PRI:
-                    sprintf(s, ": High priority input available.(%d)", si_code);
+                    return ": High priority input available.";
                     break;
                 case POLL_HUP:
-                    sprintf(s, ": Device disconnected.(%d)", si_code);
+                    return ": Device disconnected.";
                     break;
             }
             break;
         default:
-            in = 1;
             break;
     }
     // If signo == 0, the signal detected is not an error.
-    if (in){
-        switch(si_code){
-            case SI_USER:
-                sprintf(s, ": Signal sent by kill().(%d)", si_code);
-                break;
-            case SI_QUEUE:
-                sprintf(s, ": Signal sent by the sigqueue().(%d)", si_code);
-                break;
-            case SI_TIMER:
-                sprintf(s, ": Signal generated by expiration of a timer set by timer_settime().(%d)", si_code);
-                break;
-            case SI_ASYNCIO:
-                sprintf(s, ": Signal generated by completion of an asynchronous I/O request.(%d)", si_code);
-                break;
-            case SI_MESGQ:
-                sprintf(s, ": Signal generated by arrival of a message on an empty message queue.(%d)", si_code);
-                break;
-            default:
-                s = NULL;
-                break;
-        }
+    switch(si_code){
+        case SI_USER:
+            return ": Signal sent by kill().";
+            break;
+        case SI_QUEUE:
+            return ": Signal sent by the sigqueue().";
+            break;
+        case SI_TIMER:
+            return ": Signal generated by expiration of a timer set by timer_settime().";
+            break;
+        case SI_ASYNCIO:
+            return ": Signal generated by completion of an asynchronous I/O request.";
+            break;
+        case SI_MESGQ:
+            return ": Signal generated by arrival of a message on an empty message queue.";
+            break;
+        default:
+            return NULL;
+            break;
     }
-
-    return s;
 }
 
 void getsignal(const pid_t child)
@@ -707,14 +699,13 @@ void getsignal(const pid_t child)
         perror("\tERROR : getsignal : PTRACE_GETSIGINFO");
 
     // Print the signal and it's short description
-    char *s = print_si_code(sig.si_signo, sig.si_code);
-    printf("\t%s %s\n", strsignal(sig.si_signo), s);
+    printf("\t%s %s\n",
+           strsignal(sig.si_signo),
+           print_si_code(sig.si_signo, sig.si_code));
 
     // Print the addresse where the signal was raised
     if(sig.si_signo != SIGTRAP)
         printf("\tadrr = %p\n", &sig.si_addr);
-
-    free(s);
 }
 
 void helpMsg()
@@ -835,6 +826,7 @@ int start_UI(const pid_t child, int stat, const char *filename)
         {
             print_dump(filename, args);
             args[0] = '\0';
+            sleep(1);
         }
         // SYSCALL
         else if(strcmp(input, options[15]) == 0)
