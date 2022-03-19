@@ -1,19 +1,19 @@
 //#include <dirent.h>
 #include <elf.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 //#include <limits.h>
 //#include <pwd.h>
 //#include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 //#include <sys/mman.h>
 #include <sys/ptrace.h>
-#include <sys/reg.h>
+//#include <sys/reg.h>
 #include <sys/stat.h>
 //#include <sys/syscall.h>
-#include <sys/types.h>
-#include <sys/user.h>
+//#include <sys/types.h>
+//#include <sys/user.h>
 #include <sys/wait.h>
 //#include <time.h>
 #include <unistd.h>
@@ -166,7 +166,6 @@ int start_UI(const pid_t child, int stat, const char *filename)
         {
             print_dump(filename, args);
             args[0] = '\0';
-            sleep(1);
         }
         // SYSCALL
         else if(strcmp(input, options[15]) == 0)
@@ -204,6 +203,7 @@ int start_UI(const pid_t child, int stat, const char *filename)
             parse_symtab(filename, STT_OBJECT, NULL);
         else
             printf("\t\"%s\" : unknown command\n", input);
+        input[0] = '\0';
     }
     return 0;
 }

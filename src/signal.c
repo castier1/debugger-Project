@@ -1,22 +1,7 @@
-#include <dirent.h>
-#include <elf.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <pwd.h>
 #include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/ptrace.h>
-#include <sys/reg.h>
-#include <sys/stat.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-#include <sys/user.h>
-#include <sys/wait.h>
-#include <time.h>
-#include <unistd.h>
 
 char *print_si_code(const int si_signo, const int si_code)
 {

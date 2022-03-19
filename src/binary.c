@@ -1,21 +1,12 @@
-#include <dirent.h>
 #include <elf.h>
 #include <fcntl.h>
-#include <limits.h>
-#include <pwd.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/ptrace.h>
-#include <sys/reg.h>
 #include <sys/stat.h>
-#include <sys/syscall.h>
 #include <sys/types.h>
-#include <sys/user.h>
-#include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
 
 void print_dump(const char *filename, const char *input)
@@ -24,12 +15,12 @@ void print_dump(const char *filename, const char *input)
 
     // If there is a function name as an option, dump just this function
     if(strlen(input)) {
-        str = malloc(sizeof(*str) * (strlen(input) + 36));
+        str = malloc(sizeof(*str) * (strlen(filename) + strlen(input) + 36) + 1);
         sprintf(str, "objdump -d %s | sed '/<%s>:/,/^$/!d'", filename, input);
     }
     // If no options, dump all the binary
     else {
-        str = malloc(sizeof(*str) * (strlen(input) + 12));
+        str = malloc(sizeof(*str) * (strlen(filename) + 12) + 1);
         sprintf(str, "objdump -d %s", filename);
     }
 
@@ -44,7 +35,7 @@ void print_function_infos(const char *filename, const size_t addr)
     char *str;
     // 23 = strlen("addr2line -pe %s -f %lx")
     // 16 = strlen(addr)
-    str = malloc(sizeof(*str) * (strlen(filename) + 23 + 16));
+    str = malloc(sizeof(*str) * (strlen(filename) + 23 + 16) + 1);
     if(!str)
         perror("ERROR : print_function_infos: malloc");
 
