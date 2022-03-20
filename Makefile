@@ -38,8 +38,8 @@ signal: src/signal.c
 meta: src/metadata.c
 	$(CC) $(CFLAGS) -c $< -o bin/$@
 
-breakpoint: src/breakpoint.c binary
-	$(CC) $(CFLAGS) -c $< -o bin/$@ bin/binary
+breakpoint: src/breakpoint.c binary process
+	$(CC) $(CFLAGS) -c $< -o bin/$@ bin/binary bin/process
 
 binary: src/binary.c
 	$(CC) $(CFLAGS) -c $< -o bin/$@

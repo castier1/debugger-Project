@@ -5,6 +5,7 @@
 #include <sys/ptrace.h>
 #include <sys/reg.h>
 
+#include "../header/process.h"
 #include "../header/binary.h"
 #include "../header/breakpoint.h"
 
@@ -29,10 +30,13 @@ int check_exist(func_bp *list_bp, const char *func_name)
 void add_bt(const pid_t child, func_bp *bp)
 {
 	// Save the original data
-	bp->data = ptrace(PTRACE_PEEKTEXT, child, (void *)bp->addr, 0);
+	bp->data = ptrace(PTRACE_PEEKDATA, child, (void *)bp->addr, 0);
+	if(bp->data == -1)
+		perror("\tERROR : add_bt : PTRACE_PEEKTEXT");
 
 	// Add the breakpoint
-    ptrace(PTRACE_POKETEXT, child, (void *)bp->addr, (bp->data & 0xFFFFFF00) | 0xCC);
+    if(ptrace(PTRACE_POKEDATA, child, (void *)bp->addr, (bp->data & 0xFFFFFF00) | 0xCC) == -1)
+    	perror("\tERROR : add_bt : PTRACE_POKETEXT");
 
     printf("\tBreakpoint added at the %s function, at the 0x%lx address.\n", bp->name, bp->addr);
 }
@@ -48,11 +52,11 @@ int create_bp(const char *filename, const pid_t child, func_bp **list_bp, const 
 	// If no address but the name of the function
 	if(func_name){
 		addr = parse_symtab(filename, STT_FUNC, func_name, 1);
+		addr += get_start_stack_addr(child);
 	}
 	// If still no adress
 	if(!addr){
-		printf("\tCannot find right address for '%s',\
-        try to give directly the address.\n", func_name);
+		printf("\tCannot find right address for '%s'\n", func_name);
 		return -1;
 	}
 
@@ -122,13 +126,15 @@ int remove_bp(const pid_t child, func_bp **list_bp, const char *func_name)
 	// Go to the breakpoint to remove
 	for (int i = 0; i < pos; ++i)
 		tmp = tmp->next;
-	//tmp = tmp->next;
 
 	// Get the actual data
-	ptrace(PTRACE_PEEKTEXT, child, (void *)tmp->addr, 0);
+	data = ptrace(PTRACE_PEEKTEXT, child, (void *)tmp->addr, 0);
+	if(data == -1)
+		perror("\tERROR : remove_bp : PTRACE_PEEKTEXT");
 
 	// Restore the data
-    ptrace(PTRACE_POKETEXT, child, (void *)tmp->addr, (data & 0xFFFFFF00) | (tmp->data & 0xFF));
+    if(ptrace(PTRACE_POKETEXT, child, (void *)tmp->addr, (data & 0xFFFFFF00) | (tmp->data & 0xFF)) == -1)
+    	perror("\tERROR : remove_bp : PTRACE_POKETEXT");
 
     // Delete the breakpoint from the list
     if(delete_bp(list_bp, pos) == -1)
