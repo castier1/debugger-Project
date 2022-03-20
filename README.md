@@ -40,7 +40,7 @@ Pour la suite des commandes, les arguments entre crochets sont optionnels et ceu
 * `stack`: pour avoir l'état de la pile d'appel d'un processus. Affiche le contenu du fichier `/proc/[pid]/stack`. (Demande les droits sudo.)
 * `bp list`: pour afficher la liste des breakpoints créés.
 * `bp add <function>`: pour créer un breakpoint à une fonction donnée (liste des fonctions accessibles via `func`). (cf. __Problèmes rencontrés et ouverture__)
-* `bp rm <function>/all`: pour supprimer le breakpoint d'une fonction donnée (liste des breakpoints possibles via `bp list`), ou tous les breakpoints créés d'un coup. (cf. __Problèmes rencontrés et ouverture__)
+* `bp rm <function>/all`: pour supprimer le breakpoint d'une fonction donnée (liste des breakpoints possibles via `bp list`), ou pour supprimer tout les breakpoints de la liste. (cf. __Problèmes rencontrés et ouverture__)
 
 ## Utilisation
 
