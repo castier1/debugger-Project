@@ -106,11 +106,14 @@ char *syscall_name(const long long int id)
 
 static int in_syscall = 0;
 static int counter = 0;
+static int stop = 0;
 
 void print_syscall(const pid_t child, const int status, const int check_status)
 {
     // Check if the process is already stopped
-    if(check_status && WIFEXITED(status)){
+    if((check_status && WIFEXITED(status)) || stop)
+    {
+        stop = 1;
         printf("\tProcess %d stopped.\n", child);
         return;
     }
@@ -136,7 +139,9 @@ void print_syscall(const pid_t child, const int status, const int check_status)
 void jump_syscall(const pid_t child, int *status, const int check_status)
 {
     // Check if the process is already stopped
-    if(check_status && WIFEXITED(*status)) {
+    if((check_status && WIFEXITED(*status)) || stop)
+    {
+        stop = 1;
         printf("\tProcess %d stopped.\n", child);
         return;
     }
@@ -176,6 +181,7 @@ void print_all_syscall(const pid_t child, int *status)
             break;
         }
     }
+    stop = 1;
     printf("\tTotal count of syscall = %d\n", counter);
     printf("\tChild process stopped.\n");
 }
