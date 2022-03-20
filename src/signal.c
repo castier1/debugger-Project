@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ptrace.h>
+#include <sys/wait.h>
 
 char *print_si_code(const int si_signo, const int si_code)
 {
@@ -158,8 +159,14 @@ char *print_si_code(const int si_signo, const int si_code)
     }
 }
 
-void getsignal(const pid_t child)
+void getsignal(const pid_t child, const int status)
 {
+    // Check if the process is already stopped
+    if(WIFEXITED(status)){
+        printf("\tChild process stopped.\n");
+        return;
+    }
+
     siginfo_t sig;
 
     // Fill the siginfo_t structure

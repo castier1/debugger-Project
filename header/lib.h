@@ -22,7 +22,7 @@ void helpMsg();
 void kill_child_process(const pid_t child);
 
 // Resume the execution of a processus
-void resume(const pid_t child);
+void resume(const pid_t child, int *status);
 
 // Start the analyse (with user's interface)
 int start_UI(const pid_t child, int stat, const char *filename);

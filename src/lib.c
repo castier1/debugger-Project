@@ -79,11 +79,18 @@ void kill_child_process(const pid_t child)
 
 }
 
-void resume(const pid_t child)
+void resume(const pid_t child, int *status)
 {
+    // Check if the process is already stopped
+    if(WIFEXITED(*status)){
+        printf("\tChild process stopped.\n");
+        return;
+    }
+
     // Resume the execution of the child process
     if(ptrace(PTRACE_CONT, child, 0, 0) == -1)
         perror("\tERROR : resume : PTRACE_CONT");
+    waitpid(child, status, 0);
 
     // Wait 1 sec
     sleep(1);
@@ -123,10 +130,10 @@ int start_UI(const pid_t child, int stat, const char *filename)
         }
         // RUN
         else if(strcmp(input, options[2]) == 0)
-            resume(child);
+            resume(child, &status);
         // SIGNAL
         else if(strcmp(input, options[3]) == 0)
-            getsignal(child);
+            getsignal(child, status);
         // PID
         else if(strcmp(input, options[4]) == 0)
             printf("\t %d\n", child);
