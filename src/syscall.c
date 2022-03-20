@@ -136,7 +136,7 @@ void print_syscall(const pid_t child, int status, int check_status)
 int jump_syscall(const pid_t child, int status, int check_status)
 {
     // Check if the process is already stopped
-    if(check_status && WIFEXITED(status)){
+    if(check_status && (WIFEXITED(status) || WIFSTOPPED(status))){
         printf("\tChild process stopped.\n");
         return -1;
     }
