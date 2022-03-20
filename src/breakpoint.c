@@ -11,14 +11,17 @@
 int check_exist(func_bp *list_bp, const char *func_name)
 {
 	if(!list_bp)
-		return 1;
+		return -1;
 
+	int i = 0;
 	func_bp *tmp = list_bp;
+
 	while(tmp)
 	{
 		if(strcmp(tmp->name, func_name) == 0)
-			return 0;
+			return i;
 		tmp = tmp->next;
+		i++;
 	}
 	return 1;
 }
@@ -36,7 +39,7 @@ void add_bt(const pid_t child, func_bp *bp)
 
 int create_bp(const char *filename, const pid_t child, func_bp **list_bp, const char *func_name)
 {
-    if(check_exist(*list_bp, func_name) == 0){
+    if(check_exist(*list_bp, func_name) != -1){
 		printf("\tAlready exist a breakpoint for '%s'.\n", func_name);
 		return -1;
 	}
@@ -80,34 +83,46 @@ int delete_bp(func_bp **list_bp, const int pos)
 {
 	if(!*list_bp)
 		return -1;
-	if(pos == 0) {
-		*list_bp = (*list_bp)->next;
-	}
 
 	func_bp* tmp = *list_bp;
-	func_bp *to_delete;
+	func_bp *old_tmp;
 
-	for (int i = 1; i < pos; ++i)
+	if (pos == 0)
+		*list_bp = (*list_bp)->next;
+	else
+	{
+		for (int i = 1; i < pos-1; ++i)
+			tmp = tmp->next;
+
+		old_tmp = tmp;
 		tmp = tmp->next;
+		if(!tmp->next)
+		     old_tmp->next = NULL;
+		else
+		    old_tmp->next = tmp->next;
+	}
 
-	to_delete = tmp->next;
-	tmp->next = tmp->next->next;
-
-	free(to_delete);
+	free(tmp);
 }
 
-int remove_bp(const pid_t child, func_bp **list_bp, const int pos)
+int remove_bp(const pid_t child, func_bp **list_bp, const char *func_name)
 {
-	if(!list_bp)
+	if(!*list_bp)
 		return perror("\tNo breakpoints."), -1;
+
+	int pos = check_exist(*list_bp, func_name);
+	if(pos == -1) {
+		printf("\tThere is no breakpoint for '%s'.\n", func_name);
+		return -1;
+	}
 
 	unsigned int data = 0;
 	func_bp* tmp = *list_bp;
 
 	// Go to the breakpoint to remove
-	for (int i = 1; i < pos; ++i)
+	for (int i = 0; i < pos; ++i)
 		tmp = tmp->next;
-	tmp = tmp->next;
+	//tmp = tmp->next;
 
 	// Get the actual data
 	ptrace(PTRACE_PEEKTEXT, child, (void *)tmp->addr, 0);
@@ -119,7 +134,7 @@ int remove_bp(const pid_t child, func_bp **list_bp, const int pos)
     if(delete_bp(list_bp, pos) == -1)
         return -1;
 
-    printf("\tBreakpoint removed at the %s function, at the 0x%lx address.\n", tmp->name, tmp->addr);
+    printf("\tBreakpoint %d removed.\n", pos);
 
     return 0;
 }
@@ -138,12 +153,12 @@ void list_all_bp(func_bp *list_bp, int count)
 	while(tmp->next){
 		i++;
 		tmp = tmp->next;
-		printf("\t%d: %ld, %s\n", i, tmp->addr, tmp->name);
+		printf("\t%d: 0x%lx - %s\n", i, tmp->addr, tmp->name);
 	}
 }
 
 void free_list_bp(func_bp **list_bp, int count)
 {
-	for (int i = count-1; i >= 0; ++i)
+	for (int i = count-1; i >= 0; --i)
 		delete_bp(list_bp, i);
 }

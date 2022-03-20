@@ -20,7 +20,7 @@ int create_bp(const char *filename, const pid_t child, func_bp **bp, const char 
 int delete_bp(func_bp **list_bp, int pos);
 
 // Remove a breakpoint from a process
-int remove_bp(pid_t child, func_bp **bp, int pos);
+int remove_bp(pid_t child, func_bp **bp, const char *func_name);
 
 // List all the breakpoints created
 void list_all_bp(func_bp *array_bp, int count);

@@ -63,7 +63,7 @@ void helpMsg()
         gvar\t to print all the global data in the program\n\
         bp list\t to print all the breakpoints created\n\
         bp add <func>\t to create a breakpoint at a function\n\
-        bp rm <num>\t to remove a breakpoint at a function (see 'bp list' for <num>)\n");
+        bp rm <func>\t to remove a breakpoint at a function\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -209,15 +209,11 @@ int start_UI(const pid_t child, int stat, const char *filename)
             }
             else if(strcmp(arg1, "rm") == 0)
             {
-                int pos = atoi(arg2);
-                if(pos <= count_bp)
-                    if(remove_bp(child, &list_bp, pos) == 0)
-                        count_bp--;
-                else
-                    printf("Bad breakpoint numero to remove.\n");
+                if(remove_bp(child, &list_bp, arg2) == 0)
+                    count_bp--;
             }
             else
-                printf("Bad or need an arguments : '%s'\n", arg1);
+                printf("Need or bad arguments : '%s'\n", arg1);
         }
         else
             printf("\t\"%s\" : unknown command\n", input);
