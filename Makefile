@@ -8,13 +8,6 @@ TARGETS= bin/signal bin/meta bin/binary bin/process bin/syscall bin/breakpoint
 
 $(shell mkdir -p bin)
 
-# --- EXAMPLES --- #
-
-%: src/%.c
-	$(CC) $(CFLAGS) -o bin/$@ $<
-
-bad: src/bad.c analyzer
-good: src/good.c analyzer
 
 
 # --- COMPILATIONS --- #
@@ -42,6 +35,17 @@ process: src/process.c
 
 syscall: src/syscall.c
 	$(CC) $(CFLAGS) -c $< -o bin/$@
+
+
+
+# --- EXAMPLES --- #
+
+%: src/%.c
+	$(CC) $(CFLAGS) -o bin/$@ $<
+
+bad: src/bad.c analyzer
+good: src/good.c analyzer
+
 
 
 # --- CLEANNING --- #
