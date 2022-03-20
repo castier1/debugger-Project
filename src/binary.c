@@ -81,7 +81,7 @@ void *open_elf(const char *filename)
     return start;
 }
 
-void parse_symtab(const char *filename, const unsigned char TYPE, const char *func_name)
+void *parse_symtab(const char *filename, const unsigned char TYPE, const char *func_name, int ret_addr)
 {
     const char *to_ignore[2] = {"", "crtstuff.c"};
     char *strtab;
@@ -91,7 +91,7 @@ void parse_symtab(const char *filename, const unsigned char TYPE, const char *fu
     // Open the elf-file
     start = open_elf(filename);
     if(!start)
-        perror("\tERROR : get_source_file : can't retrieve data");
+        return perror("\tERROR : get_source_file : can't retrieve data"), NULL;
 
     // Capture (and cast) a pointer on the headers
     Elf64_Ehdr* hdr = (Elf64_Ehdr *) start;
@@ -140,8 +140,14 @@ void parse_symtab(const char *filename, const unsigned char TYPE, const char *fu
                     char *tmp = strtab + symtab[i].st_name;
                     if(!func_name)
                         printf("\t(0x%lx)\t%s\n", symtab[i].st_value, strtab + symtab[i].st_name);
-                    else if(strcmp(func_name, tmp) == 0)
-                        print_function_infos(filename, symtab[i].st_value);
+                    else if(strcmp(func_name, tmp) == 0){
+                        if(!ret_addr){
+                            print_function_infos(filename, symtab[i].st_value);
+                            break;
+                        }
+                        else
+                            return &symtab[i].st_value;
+                    }
                 }
             }
             break;
@@ -158,4 +164,5 @@ void parse_symtab(const char *filename, const unsigned char TYPE, const char *fu
             }
             break;
     }
+    return NULL;
 }

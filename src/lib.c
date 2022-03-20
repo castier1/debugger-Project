@@ -23,6 +23,7 @@
 #include "../header/binary.h"
 #include "../header/process.h"
 #include "../header/syscall.h"
+#include "../header/breakpoint.h"
 #include "../header/lib.h"
 
 void exec_prog(char * const *argv)
@@ -70,7 +71,10 @@ void helpMsg()
         next\t to jump to the next syscall instruction\n\
         locate <func>\t to print the location (file and line) of a given function (need addr2line)\n\
         stack\t to print the state of the program-to-analyse's stack (need sudo rights)\n\
-        gvar\t to print all the global data in the program\n");
+        gvar\t to print all the global data in the program\n\
+        bp list\t to print all the breakpoints created\n\
+        bp add <func>\t to create a breakpoint at a function\n\
+        bp remove <func>\t to remove a breakpoint at a function\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -100,13 +104,14 @@ void resume(const pid_t child)
 int start_UI(const pid_t child, int stat, const char *filename)
 {
     int status = stat;
-    int run = 1, check_status = 1, count = 0;
-    char input[20], args[20];
-    const char *options[20] = {"help", "exit", "run", "signal", "PID",
+    int run = 1, check_status = 1, count_bp = 0;
+    char input[20], arg1[20], arg2[20];
+    func_bp *list_bp = NULL;
+    const char *options[21] = {"help", "exit", "run", "signal", "PID",
                                "PPID", "GID", "PGID", "pwd", "file",
                                "meta", "lib", "fd", "func", "dump",
                                "syscall", "next", "locate", "stack",
-                               "gvar"};
+                               "gvar", "bp"};
 
     while(run)
     {
@@ -114,7 +119,7 @@ int start_UI(const pid_t child, int stat, const char *filename)
 
         char buffer[50];
         fgets(buffer, 50, stdin);
-        sscanf(buffer, "%s %s", input, args);
+        sscanf(buffer, "%s %s %s", input, arg1, arg2);
 
         // HELP
         if(strcmp(input, options[0]) == 0)
@@ -123,6 +128,8 @@ int start_UI(const pid_t child, int stat, const char *filename)
         else if(strcmp(input, options[1]) == 0)
         {
             run = 0;
+            if(list_bp)
+                free_list_bp(list_bp, count_bp);
             kill_child_process(child);
         }
         // RUN
@@ -148,7 +155,7 @@ int start_UI(const pid_t child, int stat, const char *filename)
             print_pwd(filename);
         // FILE
         else if(strcmp(input, options[9]) == 0)
-            parse_symtab(filename, STT_FILE, NULL);
+            parse_symtab(filename, STT_FILE, NULL, 0);
         // META
         else if(strcmp(input, options[10]) == 0)
             print_metadata(filename);
@@ -160,20 +167,20 @@ int start_UI(const pid_t child, int stat, const char *filename)
             print_file_descr(child);
         // FUNC
         else if(strcmp(input, options[13]) == 0)
-            parse_symtab(filename, STT_FUNC, NULL);
+            parse_symtab(filename, STT_FUNC, NULL, 0);
         // DUMP
         else if(strcmp(input, options[14]) == 0)
         {
-            print_dump(filename, args);
-            args[0] = '\0';
+            print_dump(filename, arg1);
+            arg1[0] = '\0';
         }
         // SYSCALL
         else if(strcmp(input, options[15]) == 0)
         {
             // If there is the 'all' option
-            if(strcmp(args, "all") == 0) {
+            if(strcmp(arg1, "all") == 0) {
                 print_all_syscall(child, status);
-                args[0] = '\0';
+                arg1[0] = '\0';
             }
             // If no option
             else
@@ -186,13 +193,13 @@ int start_UI(const pid_t child, int stat, const char *filename)
         else if(strcmp(input, options[17]) == 0)
         {
             // If no argument
-            if(strcmp(args, "") == 0)
+            if(strcmp(arg1, "") == 0)
                 printf("\tUSAGE : locate <function>\n\
             Use the 'func' command to list all the possible function.\n");
             // If there is an argument
             else {
-                parse_symtab(filename, STT_FUNC, args);
-                args[0] = '\0';
+                parse_symtab(filename, STT_FUNC, arg1, 0);
+                arg1[0] = '\0';
             }
         }
         // STACK
@@ -200,10 +207,27 @@ int start_UI(const pid_t child, int stat, const char *filename)
             print_stack(child);
         // GLOBAL VARIABLE
         else if(strcmp(input, options[19]) == 0)
-            parse_symtab(filename, STT_OBJECT, NULL);
+            parse_symtab(filename, STT_OBJECT, NULL, 0);
+        // GLOBAL VARIABLE
+        else if(strcmp(input, options[20]) == 0){
+            if(strcmp(arg1, "list") == 0)
+                list_all_bp(list_bp, count_bp);
+            else if(strcmp(arg1, "add") == 0){
+                if(create_bp(filename, child, list_bp, arg2, NULL) == 0);
+                    count_bp++;
+            }
+            else if(strcmp(arg1, "rm") == 0){
+                if(remove_bp(child, list_bp, count_bp) == 0);
+                    count_bp--;
+            }
+            else
+                printf("Bad or need an arguments : '%s'\n", arg1);
+        }
         else
             printf("\t\"%s\" : unknown command\n", input);
         input[0] = '\0';
+        arg1[0] = '\0';
+        arg2[0] = '\0';
     }
     return 0;
 }
