@@ -3,53 +3,55 @@ Astier Candice - M1 CHPS - Projet AISE
 
 ## Description
 
-Ce projet permet de creer une application pouvant analyser un autre programme. Il repose sur le principe de communication entre deux processus, où un processus fils lance le binaire donné et un processessus père réalise une série d'analyses de l’extérieur.
-Pour cela, le programme principale communique avec l'utilisateur via différentes commandes.
+Ce projet permet de créer une application pouvant analyser un autre programme. Il repose sur le principe de communication entre deux processus, où un processus fils lance un binaire donné et un processus père réalise une série d'analyses dessus.
+Pour cela, le programme principal communique avec l'utilisateur via différentes commandes.
+
+L'objectif de ce projet est de simuler l'action de [gdb](https://www.sourceware.org/gdb/).
 
 ## Fonctionalités
 
 ### Commandes de base
 * `help`: pour afficher la liste des commandes disponibles.
 * `exit`: pour quitter l'application.
-* `run` : pour lancer l'execution du programme.
+* `run` : pour lancer l'exécution du programme.
 
 ### Environnement du programme
 * `PID`: pour avoir le ProcessusID du programme analysé.
-* `PPID`: pour avoir le ProcessusID de l'applications (programme qui analyse).
+* `PPID`: pour avoir le ProcessusID de l'application (programme qui analyse).
 * `GID` : pour avoir le GroupID du programme analysé.
-* `PGID`: pour avoir le GroupID de l'applications (programme qui analyse).
+* `PGID`: pour avoir le GroupID de l'application (programme qui analyse).
 * `pwd` : pour avoir le chemin absolu dans la machine (si possible) du programme analysé.
 * `file`: pour avoir le nom du fichier source du programme analysé.
 * `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates).
 
 
-Pour la suite des commandes, les arguments entre crochets sont optionnels et ceux entre chevrons désigne des noms de variables à remplacer.
+Pour la suite des commandes, les arguments entre crochets sont optionnels et ceux entre chevrons désignent des noms de variables à remplacer.
 
 ### Deboggage
 * `lib`: pour avoir la liste de toutes les bibliothèques dynamiques (`.so`) chargées.
-* `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouvert par le programme annalysé.
-* `signal`: pour analyser les signaux du programme. (Pour plus de pertinance, appeler cette commande après après avoir appeler la commande `run`.).
+* `fd`: pour avoir la liste de tous les noms de descripteurs de fichiers ouverts par le programme annalysé.
+* `signal`: pour analyser les signaux du programme. (Pour plus de pertinence, appeler cette commande après après avoir appelé la commande `run`.).
 * `gvar`: pour avoir la liste de toutes les variables globales utilisées (nom et taille).
 * `func`: pour afficher l'ensemble des fonctions du programme analysé.
-* `locate <function>`: pour afficher (si possible) la localisation (fichier source et ligne) d'une fonction utilisée dans le programme analysé (voir partie __Installations__).
-* `dump [<function>]`: pour afficher l'ensemble ou une seulement fonction (si précisé) du binaire désassemblé (voir partie __Installations__).
+* `locate <function>`: pour afficher (si possible) la localisation (fichier source et ligne) d'une fonction utilisée dans le programme analysé (cf. __Installations__).
+* `dump [<function>]`: pour afficher l'ensemble ou seulement une fonction (si précisé) du binaire désassemblé (cf. __Installations__).
 * `syscall [all]`: pour afficher un seul (en cours) ou tous les appels systèmes du programme.
-* `next`: pour pouvoir continuer l'execution jusqu'au prochain appel système.
+* `next`: pour pouvoir continuer l'exécution jusqu'au prochain appel système.
 * `stack`: pour avoir l'état de la pile d'appel d'un processus. Affiche le contenu du fichier `/proc/[pid]/stack`. (Demande les droits sudo.)
 * `bp list`: pour afficher la liste des breakpoints créés.
-* `bp add <function>`: pour creer un breakpoint à une fonction donnée (liste des fonctions accessible via `func`).
-* `bp rm <function>`: pour supprimer le breakpoint d'une fonction donnée (liste des breakpoints possible via `bp list`).
+* `bp add <function>`: pour créer un breakpoint à une fonction donnée (liste des fonctions accessibles via `func`). (cf. __Problèmes rencontrés et ouverture__)
+* `bp rm <function>`: pour supprimer le breakpoint d'une fonction donnée (liste des breakpoints possibles via `bp list`). (cf. __Problèmes rencontrés et ouverture__)
 
 ## Utilisation
 
 ### Installations
 
-Pour pouvoir utiliser correctement l'ensemble des fonctionnalités, il faut vérifier que les packages suivants sont bien installé sur la machine utilisée:
-* [binutils](https://www.gnu.org/software/binutils/): pour pouvoir utiliser les commandes `dump` (qui appelle [objdump](https://linux.die.net/man/1/objdump "man objdump")) et `locate` (qui appelle [addr2line](https://linux.die.net/man/1/addr2line "man addr2line")).
+Pour pouvoir utiliser correctement l'ensemble des fonctionnalités, il faut vérifier que les packages suivants sont bien installés sur la machine utilisée:
+* [binutils](https://www.gnu.org/software/binutils/): pour pouvoir utiliser les commandes `dump` (qui appellent [objdump](https://linux.die.net/man/1/objdump "man objdump")) et `locate` (qui appellent [addr2line](https://linux.die.net/man/1/addr2line "man addr2line")).
 
 ### Lancement
 
-Pour lancer la compilation et la création de l'executable, il suffit de lancer la commande `make` dans un terminal.
+Pour lancer la compilation et la création de l'exécutable, il suffit de lancer la commande `make` dans un terminal.
 
 Puis, pour pouvoir analyser un programme exterieur, lancer la commande:
 
@@ -88,8 +90,8 @@ analyze >>> help
 	stack    to print the state of the program-to-analyse's stack (need sudo rights)
 	gvar     to print all the global data in the program
 	bp list	 to print all the breakpoints created
-	bp add <func>    to create a breakpoint at a function
-	bp rm <func>     to remove a breakpoint at a function
+	bp add <func>    to create a breakpoint at a function [Not functional yet]
+	bp rm <func>     to remove a breakpoint at a function [Not functional yet]
 analyse >>> PID
 	 71776
 analyse >>> PPID
@@ -100,7 +102,7 @@ analyse >>> exit
 
 ### Nettoyage
 
-La commande `make clean` permet de nettoyer le dossier `bin/` et de supprimer l'executable `analyzer`.
+La commande `make clean` permet de nettoyer le dossier `bin/` et de supprimer l'exécutable `analyzer`.
 
 ## Exemples
 ### good
@@ -109,7 +111,7 @@ La suite de commandes:
 1. `make good`
 2. `./analyzer bin/good`
 
-permet de tester le binaire créé d'après le programme `good.c`dans `src/`. Celui-ci est un programme simple ne générant pas d'erreur.
+permet de tester le binaire créé d'après le programme `good.c`dans `src/`. Celui-ci est un programme simple ne générant pas d'erreurs.
 
 ### bad
 La suite de commandes:
@@ -120,5 +122,19 @@ La suite de commandes:
 permet de tester le binaire créé d'après le programme `bad.c`dans `src/`. Celui-ci est un programme simple générant une erreur de segmentation.
 
 ## Autre
+### Problèmes rencontrés et ouverture
+L'un des problèmes se situe au niveau de la gestion des breakpoints, avec la résolution des adresses à transmettre à `ptrace()`.
+
+Dans la suite, on pourrait ajouter plus de commandes, telles que:
+* `lvar` (liste l'ensemble des variables locales) s'appuyant sur la structure DWARF et la bibiothèque libdwarf,
+* `bt` (backtrace) s'appuyant sur la bibiothèque libdunwind.
 
 ## References
+* man pages
+* cours AISE
+* elf : https://linux.die.net/man/5/elf, https://www.pwnthebox.net/write/your/own/xxxx/2019/11/15/writing-an-elf-parsing-library-part1-what-is-elf.html
+* https://stackoverflow.com/
+* ptrace : https://www.linuxjournal.com/article/6100
+* https://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1
+* syscall table : https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md
+* signal : https://www.mkssoftware.com/docs/man5/siginfo_t.5.asp
