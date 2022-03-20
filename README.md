@@ -91,8 +91,8 @@ analyze >>> help
 	gvar     to print all the global data in the program
 	bp list	 to print all the breakpoints created
 	bp add <func>    to create a breakpoint at a function [Not functional yet]
-	bp rm <func>/all     to remove a breakpoint at a function
-	                     or all the breakpoints created[Not functional yet]
+	bp rm <func>/all    to remove a breakpoint at a function
+	                    or all the breakpoints created [Not functional yet]
 analyse >>> pid
 	 71776
 analyse >>> ppid
@@ -124,7 +124,7 @@ permet de tester le binaire créé d'après le programme `bad.c`dans `src/`. Cel
 
 ## Autre
 ### Problèmes rencontrés et ouverture
-L'un des problèmes se situe au niveau de la gestion des breakpoints, avec la résolution des adresses à transmettre à `ptrace()`.
+L'un des problèmes se situe au niveau de la gestion des breakpoints, qui ne s'activent pas, ce qui est sûrement dû à un problème de résolution d'adresses. Pour l'instant, les commandes `bp ...` ne génèrent pas d'erreurs mais ne fonctionnent pas: l'exécution du programme ne s'arrête pas aux différents breakpoints.
 
 Dans la suite, on pourrait ajouter plus de commandes, telles que:
 * `lvar` (liste l'ensemble des variables locales) s'appuyant sur la structure DWARF et la bibiothèque libdwarf,
@@ -136,6 +136,8 @@ Dans la suite, on pourrait ajouter plus de commandes, telles que:
 * elf : https://linux.die.net/man/5/elf, https://www.pwnthebox.net/write/your/own/xxxx/2019/11/15/writing-an-elf-parsing-library-part1-what-is-elf.html
 * https://stackoverflow.com/
 * ptrace : https://www.linuxjournal.com/article/6100
+* stat : https://linux.die.net/man/2/stat
+* /proc files : https://linux.die.net/man/5/proc
 * https://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1
 * syscall table : https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md
 * signal : https://www.mkssoftware.com/docs/man5/siginfo_t.5.asp

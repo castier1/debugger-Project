@@ -27,7 +27,7 @@ int check_exist(func_bp *list_bp, const char *func_name)
 	}
 
 	// If not found
-	return 0;
+	return -1;
 }
 
 void add_bt(const pid_t child, func_bp *bp)
@@ -38,7 +38,8 @@ void add_bt(const pid_t child, func_bp *bp)
 		perror("\tERROR : add_bt : PTRACE_PEEKTEXT");
 
 	// Add the breakpoint
-    if(ptrace(PTRACE_POKEDATA, child, (void *)bp->addr, (bp->data & 0xFFFFFF00) | 0xCC) == -1)
+	long data = (bp->data & 0xffffff00) | 0xcc;
+    if(ptrace(PTRACE_POKEDATA, child, (void *)bp->addr, data) == -1)
     	perror("\tERROR : add_bt : PTRACE_POKETEXT");
 
     printf("\tBreakpoint added at the %s function, at the 0x%lx address.\n", bp->name, bp->addr);
@@ -127,7 +128,7 @@ int delete_bp(func_bp **list_bp, const int pos)
 	free(tmp);
 }
 
-int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name)
+int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name, int pos)
 {
 	// Check if the process is already stopped
     if(WIFEXITED(status)){
@@ -139,27 +140,23 @@ int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char
 	if(!*list_bp)
 		return perror("\tNo breakpoints."), -1;
 
-	// Find the position in the list of the breakpoint
-	int pos = check_exist(*list_bp, func_name);
+	// Find the position in the list of the breakpoint, if no position given
 	if(pos == -1) {
-		printf("\tThere is no breakpoint for '%s'.\n", func_name);
-		return -1;
+		if((pos = check_exist(*list_bp, func_name)) == -1)
+		{
+			printf("\tThere is no breakpoint for '%s'.\n", func_name);
+			return -1;
+		}
 	}
 
-	long data = 0;
 	func_bp* tmp = *list_bp;
 
 	// Go to the breakpoint to remove
 	for (int i = 0; i < pos; ++i)
 		tmp = tmp->next;
 
-	// Get the actual data
-	data = ptrace(PTRACE_PEEKTEXT, child, (void *)tmp->addr, 0);
-	if(data == -1)
-		perror("\tERROR : remove_bp : PTRACE_PEEKTEXT");
-
-	// Restore the data
-    if(ptrace(PTRACE_POKETEXT, child, (void *)tmp->addr, (data & 0xFFFFFF00) | (tmp->data & 0xFF)) == -1)
+	// Restore the original data
+    if(ptrace(PTRACE_POKEDATA, child, (void *)tmp->addr, tmp->data) == -1)
     	perror("\tERROR : remove_bp : PTRACE_POKETEXT");
 
     // Delete the breakpoint from the list
@@ -190,9 +187,9 @@ void list_all_bp(func_bp *list_bp, const int count)
 	}
 }
 
-void free_list_bp(func_bp **list_bp, const int count)
+void free_list_bp(const pid_t child, const int status, func_bp **list_bp, const int count)
 {
 	// Parse the list
 	for (int i = count-1; i >= 0; --i)
-		delete_bp(list_bp, i);
+		remove_bp(child, status, list_bp, NULL, i);
 }

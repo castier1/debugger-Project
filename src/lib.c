@@ -135,7 +135,7 @@ int start_UI(const pid_t child, const int stat, const char *filename)
             run = 0;
             if(list_bp) {
                 printf("\tRemoving all the breakpoints...\n");
-                free_list_bp(&list_bp, count_bp);
+                free_list_bp(child, status, &list_bp, count_bp);
             }
             kill_child_process(child, status);
         }
@@ -229,10 +229,10 @@ int start_UI(const pid_t child, const int stat, const char *filename)
             {
                 if(strcmp(arg2, "all") == 0)
                 {
-                    free_list_bp(&list_bp, count_bp);
+                    free_list_bp(child, status, &list_bp, count_bp);
                     count_bp = 0;
                 }
-                else if(remove_bp(child, status, &list_bp, arg2) == 0)
+                else if(remove_bp(child, status, &list_bp, arg2, -1) == 0)
                     count_bp--;
             }
             else if((strcmp(arg1, "") == 0) || (strcmp(arg2, "") == 0))

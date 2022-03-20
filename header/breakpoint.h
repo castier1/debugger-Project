@@ -20,10 +20,10 @@ int create_bp(const pid_t child, const int status, func_bp **list_bp, const char
 int delete_bp(func_bp **list_bp, const int pos);
 
 // Remove a breakpoint from a process
-int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name);
+int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name, int pos);
 
 // List all the breakpoints created
 void list_all_bp(func_bp *list_bp, const int count);
 
 // Deallocate all memory
-void free_list_bp(func_bp **list_bp, const int count);
+void free_list_bp(const pid_t child, const int status, func_bp **list_bp, const int count);
