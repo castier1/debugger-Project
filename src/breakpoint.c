@@ -14,13 +14,19 @@ int check_exist(func_bp *list_bp, const char *func_name)
 	int i = 0;
 	func_bp *tmp = list_bp;
 
+	// Parse all the list
 	while(tmp)
 	{
+		// Return position in list
 		if(strcmp(tmp->name, func_name) == 0)
 			return i;
+
+		// Go to the next breakpoint
 		tmp = tmp->next;
 		i++;
 	}
+
+	// If not found
 	return 0;
 }
 
@@ -63,44 +69,52 @@ int create_bp(const pid_t child, const int status, func_bp **list_bp, const char
 		return -1;
 	}
 
-	// Go to the last bp
+	// Go to the last breakpoint
 	func_bp *tmp = *list_bp;
 	while(tmp && tmp->next)
 		tmp = tmp->next;
 
 	// Create and stock breakpoint's data
 	func_bp *new_bp = malloc(sizeof(*new_bp));
+	if(!new_bp)
+		return perror("\tERROR : create_bp : malloc"), -1;
 
     strcpy(new_bp->name, func_name);
     new_bp->addr = addr;
     new_bp->next = NULL;
-
-    // Add the breakpoint in the process
-    add_bt(child, new_bp);
 
     if(tmp)
 	    tmp->next = new_bp;
 	else
 	    *list_bp = new_bp;
 
+	// Add the breakpoint in the process
+    add_bt(child, new_bp);
+
     return 0;
 }
 
 int delete_bp(func_bp **list_bp, const int pos)
 {
+	// If empy list, can't remove
 	if(!*list_bp)
 		return -1;
 
 	func_bp* tmp = *list_bp;
 	func_bp *old_tmp;
 
+	// If it's at first position
 	if (pos == 0)
 		*list_bp = (*list_bp)->next;
+	// If that's further in the list
 	else
 	{
+		// Go to the breakpoint just before
 		for (int i = 1; i < pos-1; ++i)
 			tmp = tmp->next;
 
+		// Connect the one before with the one after,
+		// to remove it from the list
 		old_tmp = tmp;
 		tmp = tmp->next;
 		if(!tmp->next)
@@ -109,6 +123,7 @@ int delete_bp(func_bp **list_bp, const int pos)
 		    old_tmp->next = tmp->next;
 	}
 
+	// Delete the breakpoint
 	free(tmp);
 }
 
@@ -120,16 +135,18 @@ int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char
         return -1;
     }
 
+    // If empty list
 	if(!*list_bp)
 		return perror("\tNo breakpoints."), -1;
 
+	// Find the position in the list of the breakpoint
 	int pos = check_exist(*list_bp, func_name);
 	if(pos == -1) {
 		printf("\tThere is no breakpoint for '%s'.\n", func_name);
 		return -1;
 	}
 
-	unsigned int data = 0;
+	long data = 0;
 	func_bp* tmp = *list_bp;
 
 	// Go to the breakpoint to remove
@@ -150,7 +167,6 @@ int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char
         return -1;
 
     printf("\tBreakpoint %d removed.\n", pos);
-
     return 0;
 }
 
@@ -158,12 +174,14 @@ void list_all_bp(func_bp *list_bp, const int count)
 {
 	printf("\t%d breakpoint(s).\n", count);
 
+	// If list empty
 	if(!list_bp)
 		return;
 
 	func_bp* tmp = list_bp;
 	int i = 0;
 
+	// Parse the list and print the data
 	printf("\t%d: 0x%lx - %s\n", i, tmp->addr, tmp->name);
 	while(tmp->next){
 		i++;
@@ -174,6 +192,7 @@ void list_all_bp(func_bp *list_bp, const int count)
 
 void free_list_bp(func_bp **list_bp, const int count)
 {
+	// Parse the list
 	for (int i = count-1; i >= 0; --i)
 		delete_bp(list_bp, i);
 }

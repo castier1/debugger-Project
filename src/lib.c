@@ -63,7 +63,8 @@ void helpMsg()
         gvar\t to print all the global data in the program\n\
         bp list\t to print all the breakpoints created\n\
         bp add <func>\t to create a breakpoint at a function [Not functional yet]\n\
-        bp rm <func>\t to remove a breakpoint at a function [Not functional yet]\n");
+        bp rm <func>/all\t to remove one breakpoint at a function\n\
+        \t\t\t or all the breakpoints created[Not functional yet]\n");
 }
 
 void kill_child_process(const pid_t child, const int status)
@@ -97,6 +98,7 @@ void resume(const pid_t child, int *status)
         perror("\tERROR : resume : PTRACE_CONT");
     waitpid(child, status, 0);
 
+    // Print the state of the end
     getsignal(child, *status);
 
     // Wait 1 sec
@@ -184,7 +186,7 @@ int start_UI(const pid_t child, const int stat, const char *filename)
         {
             // If there is the 'all' option
             if(strcmp(arg1, "all") == 0) {
-                print_all_syscall(child, status);
+                print_all_syscall(child, &status);
                 arg1[0] = '\0';
             }
             // If no option
@@ -193,7 +195,7 @@ int start_UI(const pid_t child, const int stat, const char *filename)
         }
         // NEXT
         else if(strcmp(input, options[16]) == 0)
-            jump_syscall(child, status, check_status);
+            jump_syscall(child, &status, check_status);
         // LOCATE
         else if(strcmp(input, options[17]) == 0)
         {
@@ -225,11 +227,18 @@ int start_UI(const pid_t child, const int stat, const char *filename)
             }
             else if(strcmp(arg1, "rm") == 0)
             {
-                if(remove_bp(child, status, &list_bp, arg2) == 0)
+                if(strcmp(arg2, "all") == 0)
+                {
+                    free_list_bp(&list_bp, count_bp);
+                    count_bp = 0;
+                }
+                else if(remove_bp(child, status, &list_bp, arg2) == 0)
                     count_bp--;
             }
+            else if((strcmp(arg1, "") == 0) || (strcmp(arg2, "") == 0))
+                printf("\tNeed arguments\n");
             else
-                printf("Need or bad arguments : '%s'\n", arg1);
+                printf("\tBad arguments : '%s' or '%s'\n", arg1, arg2);
         }
         else
             printf("\t\"%s\" : unknown command\n", input);

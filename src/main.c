@@ -21,13 +21,13 @@ int main(int argc, char *argv[])
     child = fork();
     // If fork failed
     if (child < 0)
-        return printf("ERROR : main : fork failed"), 1;
+        return printf("\tERROR : main : fork failed"), 1;
     // If in Child process
 	else if(child == 0)
 	{
 		// Run the program given in parameters
 		if(run_prog(argv) == -1)
-			return printf("ERROR : main : run_prog\n"), 1;
+			return printf("\tERROR : main : run_prog\n"), 1;
 
 		exit(0);
 	}
@@ -35,15 +35,15 @@ int main(int argc, char *argv[])
 	else {
 		// Wait the child process stop
 		if(waitpid(child, &status, 0) == -1)
-			return printf("ERROR : main : waitpid\n"), 1;
+			return printf("\tERROR : main : waitpid\n"), 1;
 
 		// Help the process to distinguish between traps 
 		if(ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD) == -1)
-			return perror("ERROR : main : PTRACE_SETOPTIONS/PTRACE_O_TRACESYSGOOD"), 1;
+			return perror("\tERROR : main : PTRACE_SETOPTIONS/PTRACE_O_TRACESYSGOOD"), 1;
 
 		// Start the communication with user
 		if(start_UI(child, status, argv[0]) == -1)
-			return printf("ERROR : main : start_UI\n"), 1;
+			return printf("\tERROR : main : start_UI\n"), 1;
 	}
 
 	return 0;

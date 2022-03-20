@@ -7,7 +7,7 @@ char *syscall_name(const long long int id);
 void print_syscall(const pid_t child, const int status, const int check_status);
 
 // Jump to the next syscall
-int jump_syscall(const pid_t child, int status, const int check_status);
+int jump_syscall(const pid_t child, int *status, const int check_status);
 
 // Run the program and print all it's execution
-void print_all_syscall(const pid_t child, int status);
+void print_all_syscall(const pid_t child, int *status);

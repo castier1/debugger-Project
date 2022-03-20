@@ -94,20 +94,27 @@ long get_start_stack_addr(const pid_t child)
     char filename[30], buff[512], str[20], name[20];
     long from, negl;
 
+    // Retrieve the filename
     sprintf(filename, "/proc/%d/maps", child);
 
-    FILE *file = fopen(filename, "r");
+    // Open the file
+    FILE *file;
+    file = fopen(filename, "r");
     if(file == NULL) {
         perror("\tERROR : get_start_stack_addr : unable to open /proc/[pid]/maps\n");
         return 0;
     }
 
-    while(fgets(buff, 512, file) != NULL) {
+    // Parse the file, line by line
+    while(fgets(buff, 512, file))
+    {
         sscanf(buff, "%lx-%lx %s %ld %s %ld %s", &from, &negl, str, &negl, str, &negl, name);
+        // If that is the wanted line
         if(strcmp(name, "[stack]") == 0)
             break;
     }
 
+    // Close the file
     fclose(file);
     return from;
 }

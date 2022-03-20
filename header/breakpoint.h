@@ -3,7 +3,7 @@
 typedef struct breakpoint{
     long int addr;                // address of the breakpoint
     char name[30];             // name of the function to stop
-    int data;                  // data stored at the address originally
+    long data;                  // data stored at the address originally
     struct breakpoint *next;   // next breakpoint created (or NULL)
 } func_bp;
 
