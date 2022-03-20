@@ -10,4 +10,4 @@ void print_function_infos(const char *filename, const size_t addr);
 void *open_elf(const char *filename);
 
 // Parse an elf file and retrieve data: source file name or functions name
-void *parse_symtab(const char *filename, const unsigned char TYPE, const char *func_name, int ret_addr);
+long int parse_symtab(const char *filename, const unsigned char TYPE, const char *func_name, int ret_addr);

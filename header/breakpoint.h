@@ -1,27 +1,29 @@
 #pragma once
 
 typedef struct breakpoint{
-	int avail;
-    void *addr;         // address of the breakpoint
-    char name[20];     // name of the function to stop
-    int data;          // data stored at the address originally
-    struct breakpoint *next;
+    long int addr;                // address of the breakpoint
+    char name[30];             // name of the function to stop
+    int data;                  // data stored at the address originally
+    struct breakpoint *next;   // next breakpoint created (or NULL)
 } func_bp;
 
-// Add a breakpoint
-void add_bt(pid_t child, func_bp* bp);
+// Parse the list of breakpoints
+int check_exist(func_bp *list_bp, const char *func_name);
 
-// Create a breakpoint
-int create_bp(const char* filename, const pid_t child, func_bp* bp, const char * func_name, void *addr);
+// Add a breakpoint in a process
+void add_bt(pid_t child, func_bp *bp);
 
-//
-int delete_bp(func_bp* list_bp, int pos);
+// Create a breakpoint structure
+int create_bp(const char *filename, const pid_t child, func_bp **bp, const char *func_name);
 
-// Remove a breakpoint
-int remove_bp(pid_t child, func_bp* bp, int pos);
+// Delete a breakpoint structure
+int delete_bp(func_bp **list_bp, int pos);
+
+// Remove a breakpoint from a process
+int remove_bp(pid_t child, func_bp **bp, int pos);
 
 // List all the breakpoints created
-void list_all_bp(func_bp* array_bp, int count);
+void list_all_bp(func_bp *array_bp, int count);
 
-//
-void free_list_bp(func_bp* list_bp, int count);
+// Deallocate all memory
+void free_list_bp(func_bp **list_bp, int count);

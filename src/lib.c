@@ -1,21 +1,10 @@
-//#include <dirent.h>
 #include <elf.h>
-//#include <fcntl.h>
-//#include <limits.h>
-//#include <pwd.h>
-//#include <signal.h>
 #include <stdio.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <string.h>
-//#include <sys/mman.h>
 #include <sys/ptrace.h>
-//#include <sys/reg.h>
 #include <sys/stat.h>
-//#include <sys/syscall.h>
-//#include <sys/types.h>
-//#include <sys/user.h>
 #include <sys/wait.h>
-//#include <time.h>
 #include <unistd.h>
 
 #include "../header/metadata.h"
@@ -74,7 +63,7 @@ void helpMsg()
         gvar\t to print all the global data in the program\n\
         bp list\t to print all the breakpoints created\n\
         bp add <func>\t to create a breakpoint at a function\n\
-        bp remove <func>\t to remove a breakpoint at a function\n");
+        bp rm <num>\t to remove a breakpoint at a function (see 'bp list' for <num>)\n");
 }
 
 void kill_child_process(const pid_t child)
@@ -129,7 +118,7 @@ int start_UI(const pid_t child, int stat, const char *filename)
         {
             run = 0;
             if(list_bp)
-                free_list_bp(list_bp, count_bp);
+                free_list_bp(&list_bp, count_bp);
             kill_child_process(child);
         }
         // RUN
@@ -208,23 +197,31 @@ int start_UI(const pid_t child, int stat, const char *filename)
         // GLOBAL VARIABLE
         else if(strcmp(input, options[19]) == 0)
             parse_symtab(filename, STT_OBJECT, NULL, 0);
-        // GLOBAL VARIABLE
-        else if(strcmp(input, options[20]) == 0){
+        // BREAKPOINTS
+        else if(strcmp(input, options[20]) == 0)
+        {
             if(strcmp(arg1, "list") == 0)
                 list_all_bp(list_bp, count_bp);
-            else if(strcmp(arg1, "add") == 0){
-                if(create_bp(filename, child, list_bp, arg2, NULL) == 0);
+            else if(strcmp(arg1, "add") == 0)
+            {
+                if(create_bp(filename, child, &list_bp, arg2) == 0)
                     count_bp++;
             }
-            else if(strcmp(arg1, "rm") == 0){
-                if(remove_bp(child, list_bp, count_bp) == 0);
-                    count_bp--;
+            else if(strcmp(arg1, "rm") == 0)
+            {
+                int pos = atoi(arg2);
+                if(pos <= count_bp)
+                    if(remove_bp(child, &list_bp, pos) == 0)
+                        count_bp--;
+                else
+                    printf("Bad breakpoint numero to remove.\n");
             }
             else
                 printf("Bad or need an arguments : '%s'\n", arg1);
         }
         else
             printf("\t\"%s\" : unknown command\n", input);
+
         input[0] = '\0';
         arg1[0] = '\0';
         arg2[0] = '\0';

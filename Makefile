@@ -2,7 +2,7 @@
 
 CC=gcc
 CFLAGS= -g
-TARGETS= bin/signal bin/meta bin/binary bin/process bin/syscall
+TARGETS= bin/signal bin/meta bin/binary bin/process bin/syscall bin/breakpoint
 
 .PHONY: analyzer clean
 
@@ -20,8 +20,8 @@ run: analyzer bad good
 %: src/%.c
 	$(CC) $(CFLAGS) -o bin/$@ $<
 
-bad: src/bad.c
-good: src/good.c
+bad: src/bad.c analyzer
+good: src/good.c analyzer
 
 
 # --- COMPILATIONS --- #
@@ -29,7 +29,7 @@ good: src/good.c
 analyzer: src/main.c lib
 	$(CC) $(CFLAGS) -o $@ $< bin/lib $(TARGETS)
 
-lib: src/lib.c signal meta binary process syscall
+lib: src/lib.c signal meta binary process syscall breakpoint
 	$(CC) $(CFLAGS) -c -o bin/$@ $< $(TARGETS)
 
 signal: src/signal.c
@@ -37,6 +37,9 @@ signal: src/signal.c
 
 meta: src/metadata.c
 	$(CC) $(CFLAGS) -c $< -o bin/$@
+
+breakpoint: src/breakpoint.c binary
+	$(CC) $(CFLAGS) -c $< -o bin/$@ bin/binary
 
 binary: src/binary.c
 	$(CC) $(CFLAGS) -c $< -o bin/$@
