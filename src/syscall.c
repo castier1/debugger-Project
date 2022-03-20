@@ -120,25 +120,25 @@ void print_syscall(const pid_t child, const int status, const int check_status)
     if(ptrace(PTRACE_GETREGS, child, NULL, &regs) == -1)
         perror("\tERROR : print_syscall : PTRACE_GETREGS");
 
-    // If just before a syscall, print it's name and description
+    char *str = syscall_name(regs.orig_rax);
+    if(str){
+        printf("\t%s (%ld, %ld, %ld, %ld, %ld, %ld)\n",
+                str, (long)regs.rdi, (long)regs.rsi, (long)regs.rdx,
+                     (long)regs.r10, (long)regs.r8,  (long)regs.r9);
+    }
+    // If just before a syscall, save it and increase counter
     if(!in_syscall){
-        char *str = syscall_name(regs.orig_rax);
-        if(str){
-            printf("\t%s (%ld, %ld, %ld, %ld, %ld, %ld)\n",
-                    str, (long)regs.rdi, (long)regs.rsi, (long)regs.rdx,
-                         (long)regs.r10, (long)regs.r8,  (long)regs.r9);
-        }
         in_syscall = 1;
         counter++;
     }
 }
 
-int jump_syscall(const pid_t child, int status, const int check_status)
+void jump_syscall(const pid_t child, int *status, const int check_status)
 {
     // Check if the process is already stopped
-    if(check_status && (WIFEXITED(status) || WIFSTOPPED(status))){
+    if(check_status && WIFEXITED(*status)) {
         printf("\tProcess %d stopped.\n", child);
-        return -1;
+        return;
     }
 
     // Jump to the next syscall
@@ -146,27 +146,26 @@ int jump_syscall(const pid_t child, int status, const int check_status)
         perror("\tERROR : jump_syscall : PTRACE_SYSCALL");
 
     // Wait the end of the execution
-    waitpid(child, &status, 0);
+    waitpid(child, status, 0);
     in_syscall = 0;
 
     if(check_status)
-        printf("\tjump to the next syscall or instruction.\n\t(call 'syscall' for more information)\n");
-    return status;
+        printf("\tJump to the next syscall.\n");
 }
 
-void print_all_syscall(const pid_t child, int status)
+void print_all_syscall(const pid_t child, int *status)
 {
     // Disable some comments
     int check_status = 0;
     siginfo_t sig;
 
     // While the program is running
-    while(!WIFEXITED(status))
+    while(!WIFEXITED(*status))
     {
         // Find and print syscall
-        print_syscall(child, status, check_status);
+        print_syscall(child, *status, check_status);
         //Jump to the next syscall
-        status = jump_syscall(child, status, check_status);
+        jump_syscall(child, status, check_status);
 
         // Check signal
         if(ptrace(PTRACE_GETSIGINFO, child, NULL, &sig) == -1)
