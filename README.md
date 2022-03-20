@@ -16,10 +16,10 @@ L'objectif de ce projet est de simuler l'action de [gdb](https://www.sourceware.
 * `run` : pour lancer l'exécution du programme.
 
 ### Environnement du programme
-* `PID`: pour avoir le ProcessusID du programme analysé.
-* `PPID`: pour avoir le ProcessusID de l'application (programme qui analyse).
-* `GID` : pour avoir le GroupID du programme analysé.
-* `PGID`: pour avoir le GroupID de l'application (programme qui analyse).
+* `pid`: pour avoir le ProcessusID du programme analysé.
+* `ppid`: pour avoir le ProcessusID de l'application (programme qui analyse).
+* `gid` : pour avoir le GroupID du programme analysé.
+* `pgid`: pour avoir le GroupID de l'application (programme qui analyse).
 * `pwd` : pour avoir le chemin absolu dans la machine (si possible) du programme analysé.
 * `file`: pour avoir le nom du fichier source du programme analysé.
 * `meta`: pour avoir les propriétés générales du programme analysé (type, mode, propriétaire, tailles, dates).
@@ -72,10 +72,10 @@ analyze >>> help
 	extit    to quit this interface
 	run      to run the program
 	signal   to print the last signal received
-	PID      to print the PID
-	PPID     to print the Parent PID
-	GID      to print the GID
-	PGID     to print the Parent GID
+	pid      to print the PID
+	ppid     to print the Parent PID
+	gid      to print the GID
+	pgid     to print the Parent GID
 	pwd      to print the absolute path of the program to analyse
 	file     to print the name of the source code file
 	meta     to print all the metadata of the file to analyse (type, mode, owner, size, time)
@@ -92,9 +92,9 @@ analyze >>> help
 	bp list	 to print all the breakpoints created
 	bp add <func>    to create a breakpoint at a function [Not functional yet]
 	bp rm <func>     to remove a breakpoint at a function [Not functional yet]
-analyse >>> PID
+analyse >>> pid
 	 71776
-analyse >>> PPID
+analyse >>> ppid
 	 71775
 analyse >>> exit
 	Process 71776 killed
