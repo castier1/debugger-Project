@@ -40,7 +40,7 @@ Pour la suite des commandes, les arguments entre crochets sont optionnels et ceu
 * `stack`: pour avoir l'état de la pile d'appel d'un processus. Affiche le contenu du fichier `/proc/[pid]/stack`. (Demande les droits sudo.)
 * `bp list`: pour afficher la liste des breakpoints créés.
 * `bp add <function>`: pour créer un breakpoint à une fonction donnée (liste des fonctions accessibles via `func`). (cf. __Problèmes rencontrés et ouverture__)
-* `bp rm <function>`: pour supprimer le breakpoint d'une fonction donnée (liste des breakpoints possibles via `bp list`). (cf. __Problèmes rencontrés et ouverture__)
+* `bp rm <function>/all`: pour supprimer le breakpoint d'une fonction donnée (liste des breakpoints possibles via `bp list`), ou tous les breakpoints créés d'un coup. (cf. __Problèmes rencontrés et ouverture__)
 
 ## Utilisation
 
@@ -91,7 +91,8 @@ analyze >>> help
 	gvar     to print all the global data in the program
 	bp list	 to print all the breakpoints created
 	bp add <func>    to create a breakpoint at a function [Not functional yet]
-	bp rm <func>     to remove a breakpoint at a function [Not functional yet]
+	bp rm <func>/all     to remove a breakpoint at a function
+	                     or all the breakpoints created[Not functional yet]
 analyse >>> pid
 	 71776
 analyse >>> ppid
