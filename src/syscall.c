@@ -8,7 +8,7 @@
 #include <sys/user.h>
 #include <sys/wait.h>
 
-char *syscall_name(long long int id)
+char *syscall_name(const long long int id)
 {
     switch(id){
         case SYS_exit: return "SYS_exit"; break;
@@ -107,11 +107,11 @@ char *syscall_name(long long int id)
 static int in_syscall = 0;
 static int counter = 0;
 
-void print_syscall(const pid_t child, int status, int check_status)
+void print_syscall(const pid_t child, const int status, const int check_status)
 {
     // Check if the process is already stopped
     if(check_status && WIFEXITED(status)){
-        printf("\tChild process stopped.\n");
+        printf("\tProcess %d stopped.\n", child);
         return;
     }
 
@@ -133,11 +133,11 @@ void print_syscall(const pid_t child, int status, int check_status)
     }
 }
 
-int jump_syscall(const pid_t child, int status, int check_status)
+int jump_syscall(const pid_t child, int status, const int check_status)
 {
     // Check if the process is already stopped
     if(check_status && (WIFEXITED(status) || WIFSTOPPED(status))){
-        printf("\tChild process stopped.\n");
+        printf("\tProcess %d stopped.\n", child);
         return -1;
     }
 

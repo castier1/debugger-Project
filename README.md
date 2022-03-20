@@ -138,3 +138,4 @@ Dans la suite, on pourrait ajouter plus de commandes, telles que:
 * https://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1
 * syscall table : https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md
 * signal : https://www.mkssoftware.com/docs/man5/siginfo_t.5.asp
+* wait : https://www.gnu.org/software/libc/manual/html_node/Process-Completion-Status.html

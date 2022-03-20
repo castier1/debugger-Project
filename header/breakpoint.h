@@ -7,23 +7,23 @@ typedef struct breakpoint{
     struct breakpoint *next;   // next breakpoint created (or NULL)
 } func_bp;
 
-// Parse the list of breakpoints
+// Parse the list of breakpoints, and return the position if exist
 int check_exist(func_bp *list_bp, const char *func_name);
 
 // Add a breakpoint in a process
-void add_bt(pid_t child, func_bp *bp);
+void add_bt(const pid_t child, func_bp *bp);
 
 // Create a breakpoint structure
-int create_bp(const char *filename, const pid_t child, func_bp **bp, const char *func_name);
+int create_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name, const char *filename);
 
 // Delete a breakpoint structure
-int delete_bp(func_bp **list_bp, int pos);
+int delete_bp(func_bp **list_bp, const int pos);
 
 // Remove a breakpoint from a process
-int remove_bp(pid_t child, func_bp **bp, const char *func_name);
+int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name);
 
 // List all the breakpoints created
-void list_all_bp(func_bp *array_bp, int count);
+void list_all_bp(func_bp *list_bp, const int count);
 
 // Deallocate all memory
-void free_list_bp(func_bp **list_bp, int count);
+void free_list_bp(func_bp **list_bp, const int count);

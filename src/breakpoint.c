@@ -11,9 +11,6 @@
 
 int check_exist(func_bp *list_bp, const char *func_name)
 {
-	if(!list_bp)
-		return -1;
-
 	int i = 0;
 	func_bp *tmp = list_bp;
 
@@ -24,7 +21,7 @@ int check_exist(func_bp *list_bp, const char *func_name)
 		tmp = tmp->next;
 		i++;
 	}
-	return 1;
+	return 0;
 }
 
 void add_bt(const pid_t child, func_bp *bp)
@@ -41,8 +38,14 @@ void add_bt(const pid_t child, func_bp *bp)
     printf("\tBreakpoint added at the %s function, at the 0x%lx address.\n", bp->name, bp->addr);
 }
 
-int create_bp(const char *filename, const pid_t child, func_bp **list_bp, const char *func_name)
+int create_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name, const char *filename)
 {
+	// Check if the process is already stopped
+    if(WIFEXITED(status)){
+        printf("\tProcess %d stopped.\n", child);
+        return -1;
+    }
+    // Check if it already exist a breakpoint for this function
     if(check_exist(*list_bp, func_name) != -1){
 		printf("\tAlready exist a breakpoint for '%s'.\n", func_name);
 		return -1;
@@ -109,8 +112,14 @@ int delete_bp(func_bp **list_bp, const int pos)
 	free(tmp);
 }
 
-int remove_bp(const pid_t child, func_bp **list_bp, const char *func_name)
+int remove_bp(const pid_t child, const int status, func_bp **list_bp, const char *func_name)
 {
+	// Check if the process is already stopped
+    if(WIFEXITED(status)){
+        printf("\tProcess %d stopped.\n", child);
+        return -1;
+    }
+
 	if(!*list_bp)
 		return perror("\tNo breakpoints."), -1;
 
@@ -145,7 +154,7 @@ int remove_bp(const pid_t child, func_bp **list_bp, const char *func_name)
     return 0;
 }
 
-void list_all_bp(func_bp *list_bp, int count)
+void list_all_bp(func_bp *list_bp, const int count)
 {
 	printf("\t%d breakpoint(s).\n", count);
 
@@ -163,7 +172,7 @@ void list_all_bp(func_bp *list_bp, int count)
 	}
 }
 
-void free_list_bp(func_bp **list_bp, int count)
+void free_list_bp(func_bp **list_bp, const int count)
 {
 	for (int i = count-1; i >= 0; --i)
 		delete_bp(list_bp, i);

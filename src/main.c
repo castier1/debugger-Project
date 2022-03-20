@@ -36,9 +36,11 @@ int main(int argc, char *argv[])
 		// Wait the child process stop
 		if(waitpid(child, &status, 0) == -1)
 			return printf("ERROR : main : waitpid\n"), 1;
+
 		// Help the process to distinguish between traps 
 		if(ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD) == -1)
 			return perror("ERROR : main : PTRACE_SETOPTIONS/PTRACE_O_TRACESYSGOOD"), 1;
+
 		// Start the communication with user
 		if(start_UI(child, status, argv[0]) == -1)
 			return printf("ERROR : main : start_UI\n"), 1;

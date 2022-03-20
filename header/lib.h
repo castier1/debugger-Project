@@ -3,10 +3,10 @@
 /* ------- CHILD PROCESS ------- */
 
 // Start program execution
-void exec_prog(char * const* argv);
+void exec_prog(char * const *argv);
 
 // Run the given program and active ptrace
-int run_prog(char * const* argv);
+int run_prog(char * const *argv);
 
 
 
@@ -19,10 +19,10 @@ void where_am_i(const char *file, const char *function, const int line);
 void helpMsg();
 
 // Kill a given processus
-void kill_child_process(const pid_t child);
+void kill_child_process(const pid_t child, const int status);
 
 // Resume the execution of a processus
 void resume(const pid_t child, int *status);
 
 // Start the analyse (with user's interface)
-int start_UI(const pid_t child, int stat, const char *filename);
+int start_UI(const pid_t child, const int stat, const char *filename);

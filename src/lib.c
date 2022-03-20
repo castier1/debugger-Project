@@ -22,7 +22,7 @@ void exec_prog(char * const *argv)
         perror("\tERROR: exec_prog: execv");
 }
 
-int run_prog(char * const* argv)
+int run_prog(char * const *argv)
 {
     // Enable the ptrace system and stop (pause) the execution of this process
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1)
@@ -44,10 +44,10 @@ void helpMsg()
         exit\t to quit this interface\n\
         run\t to run the program\n\
         signal\t to print the last signal received\n\
-        PID\t to print the PID\n\
-        PPID\t to print the Parent PID\n\
-        GID\t to print the GID\n\
-        PGID\t to print the Parent GID\n\
+        pid\t to print the PID\n\
+        ppid\t to print the Parent PID\n\
+        gid\t to print the GID\n\
+        pgid\t to print the Parent GID\n\
         pwd\t to print the absolute path of the program to analyse\n\
         file\t to print the name of the source code file\n\
         meta\t to print all the metadata of the file to analyse (type, mode, owner, size, time)\n\
@@ -62,17 +62,22 @@ void helpMsg()
         stack\t to print the state of the program-to-analyse's stack (need sudo rights)\n\
         gvar\t to print all the global data in the program\n\
         bp list\t to print all the breakpoints created\n\
-        bp add <func>\t to create a breakpoint at a function\n\
-        bp rm <func>\t to remove a breakpoint at a function\n");
+        bp add <func>\t to create a breakpoint at a function [Not functional yet]\n\
+        bp rm <func>\t to remove a breakpoint at a function [Not functional yet]\n");
 }
 
-void kill_child_process(const pid_t child)
+void kill_child_process(const pid_t child, const int status)
 {
+    // Check if the process is already stopped
+    if(WIFEXITED(status)){
+        printf("\tProcess %d killed.\n", child);
+        return;
+    }
     // Kill the child process to stop it
-    if(ptrace(PTRACE_KILL, child, 0, 0) == -1)
+    else if(ptrace(PTRACE_KILL, child, 0, 0) == -1)
         perror("\tERROR : kill_child_process : PTRACE_KILL");
     else
-        printf("\tProcess %d killed\n", child);
+        printf("\tProcess %d killed.\n", child);
 
     // Wait 1 sec
     sleep(1);
@@ -83,7 +88,7 @@ void resume(const pid_t child, int *status)
 {
     // Check if the process is already stopped
     if(WIFEXITED(*status)){
-        printf("\tChild process stopped.\n");
+        printf("\tProcess %d stopped.\n", child);
         return;
     }
 
@@ -92,19 +97,21 @@ void resume(const pid_t child, int *status)
         perror("\tERROR : resume : PTRACE_CONT");
     waitpid(child, status, 0);
 
+    getsignal(child, *status);
+
     // Wait 1 sec
     sleep(1);
 
 }
 
-int start_UI(const pid_t child, int stat, const char *filename)
+int start_UI(const pid_t child, const int stat, const char *filename)
 {
     int status = stat;
     int run = 1, check_status = 1, count_bp = 0;
     char input[20], arg1[20], arg2[20];
     func_bp *list_bp = NULL;
-    const char *options[21] = {"help", "exit", "run", "signal", "PID",
-                               "PPID", "GID", "PGID", "pwd", "file",
+    const char *options[21] = {"help", "exit", "run", "signal", "pid",
+                               "ppid", "gid", "pgid", "pwd", "file",
                                "meta", "lib", "fd", "func", "dump",
                                "syscall", "next", "locate", "stack",
                                "gvar", "bp"};
@@ -124,9 +131,11 @@ int start_UI(const pid_t child, int stat, const char *filename)
         else if(strcmp(input, options[1]) == 0)
         {
             run = 0;
-            if(list_bp)
+            if(list_bp) {
+                printf("\tRemoving all the breakpoints...\n");
                 free_list_bp(&list_bp, count_bp);
-            kill_child_process(child);
+            }
+            kill_child_process(child, status);
         }
         // RUN
         else if(strcmp(input, options[2]) == 0)
@@ -211,12 +220,12 @@ int start_UI(const pid_t child, int stat, const char *filename)
                 list_all_bp(list_bp, count_bp);
             else if(strcmp(arg1, "add") == 0)
             {
-                if(create_bp(filename, child, &list_bp, arg2) == 0)
+                if(create_bp(child, status, &list_bp, arg2, filename) == 0)
                     count_bp++;
             }
             else if(strcmp(arg1, "rm") == 0)
             {
-                if(remove_bp(child, &list_bp, arg2) == 0)
+                if(remove_bp(child, status, &list_bp, arg2) == 0)
                     count_bp--;
             }
             else

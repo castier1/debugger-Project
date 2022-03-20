@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-void print_stack(pid_t child)
+void print_stack(const pid_t child)
 {
     // Retrieve the cmd
     char cmd[30];
@@ -89,7 +89,7 @@ void print_lib(const pid_t child)
     fclose(file);
 }
 
-long get_start_stack_addr(pid_t child)
+long get_start_stack_addr(const pid_t child)
 {
     char filename[30], buff[512], str[20], name[20];
     long from, negl;

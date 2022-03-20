@@ -163,7 +163,7 @@ void getsignal(const pid_t child, const int status)
 {
     // Check if the process is already stopped
     if(WIFEXITED(status)){
-        printf("\tChild process stopped.\n");
+        printf("\tProcess %d stopped.\n", child);
         return;
     }
 
