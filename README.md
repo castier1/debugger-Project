@@ -89,7 +89,7 @@ analyze >>> help
 	gvar     to print all the global data in the program
 	bp list	 to print all the breakpoints created
 	bp add <func>    to create a breakpoint at a function
-	bp rm <func>      to remove a breakpoint at a function
+	bp rm <func>     to remove a breakpoint at a function
 analyse >>> PID
 	 71776
 analyse >>> PPID
