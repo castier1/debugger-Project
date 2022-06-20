@@ -106,6 +106,24 @@ void resume(const pid_t child, int *status)
 
 }
 
+void print_title()
+{
+    printf("\n\tCandice Astier - M1 CHPS\n");
+    printf(R"EOF(
+  ____                                        
+ |  _ \ _ __ ___   ___ ___  ___ ___ _   _ ___ 
+ | |_) | '__/ _ \ / __/ _ \/ __/ __| | | / __|
+ |  __/| | | (_) | (_|  __/\__ \__ \ |_| \__ \
+ |_| _ |_|  \___/ \___\___||___/___/\__,_|___/
+    / \   _ __   __ _| |_   _ _______ _ __    
+   / _ \ | '_ \ / _` | | | | |_  / _ \ '__|   
+  / ___ \| | | | (_| | | |_| |/ /  __/ |      
+ /_/   \_\_| |_|\__,_|_|\__, /___\___|_|      
+                        |___/                         
+    )EOF");
+    printf("\n\n");
+}
+
 int start_UI(const pid_t child, const int stat, const char *filename)
 {
     int status = stat;
@@ -118,6 +136,7 @@ int start_UI(const pid_t child, const int stat, const char *filename)
                                "syscall", "next", "locate", "stack",
                                "gvar", "bp"};
 
+    print_title();
     while(run)
     {
         printf("analyse >>> ");
